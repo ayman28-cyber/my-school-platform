@@ -1,13 +1,15 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
+import fsSync from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const DB_FILE = path.join(__dirname, 'data', 'school_database.json');
 
 app.use(express.json({ limit: '25mb' }));
@@ -490,22 +492,36 @@ app.post('/api/messages', async (req: Request, res: Response) => {
 
 // Vite Middleware & Static Serving
 async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+  const distPath = path.join(__dirname, 'dist');
+  const distIndexExists = fsSync.existsSync(path.join(distPath, 'index.html'));
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    process.env.npm_lifecycle_event === 'start' ||
+    (distIndexExists && process.env.NODE_ENV !== 'development' && process.env.npm_lifecycle_event !== 'dev');
+
+  if (isProduction) {
+    console.log('📦 Serving production static bundle from:', distPath);
+    app.use(express.static(distPath));
+    app.get('*', (_req: Request, res: Response) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  } else {
+    console.log('⚡ Initializing Vite development middleware...');
     const { createServer } = await import('vite');
     const vite = await createServer({
       server: { middlewareMode: true },
       appType: 'spa'
     });
     app.use(vite.middlewares);
-  } else {
-    app.use(express.static(path.join(__dirname, 'dist')));
-    app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-    });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 My School Clean Platform running at http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 My School Platform successfully listening at http://0.0.0.0:${PORT}`);
+  });
+
+  server.on('error', (err: any) => {
+    console.error('❌ Server startup error:', err);
+    process.exit(1);
   });
 }
 

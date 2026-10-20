@@ -9,7 +9,9 @@
       "gradeOrSubject": "الفيزياء",
       "email": "m.almansour@myschool.edu",
       "schoolClass": "هيئة التدريس - قسم العلوم",
-      "badges": ["معلم معتمد في My School"],
+      "badges": [
+        "معلم معتمد في My School"
+      ],
       "stats": {
         "completedLessons": 0,
         "gpa": 5,
@@ -26,7 +28,9 @@
       "gradeOrSubject": "الكيمياء",
       "email": "m.aldosari@myschool.edu",
       "schoolClass": "هيئة التدريس - قسم العلوم",
-      "badges": ["معلمة معتمدة في My School"],
+      "badges": [
+        "معلمة معتمدة في My School"
+      ],
       "stats": {
         "completedLessons": 0,
         "gpa": 5,
@@ -43,7 +47,9 @@
       "gradeOrSubject": "أولى ثانوي",
       "email": "a.alshehri@myschool.edu",
       "schoolClass": "1/3",
-      "badges": ["طالب في My School"],
+      "badges": [
+        "طالب في My School"
+      ],
       "stats": {
         "completedLessons": 0,
         "gpa": 98.5,
@@ -60,12 +66,33 @@
       "gradeOrSubject": "ثانية بكالوريا",
       "email": "sara.alzahrani@myschool.edu",
       "schoolClass": "2/4",
-      "badges": ["طالبة في My School"],
+      "badges": [
+        "طالبة في My School"
+      ],
       "stats": {
         "completedLessons": 0,
         "gpa": 99.2,
         "attendanceRate": 100,
         "points": 650
+      }
+    },
+    {
+      "id": "u-student-1792498430402",
+      "name": "فهد العتيبي",
+      "role": "student",
+      "gender": "male",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      "gradeOrSubject": "أولى ثانوي",
+      "email": "فهد.العتيبي@myschool.edu",
+      "schoolClass": "1/5",
+      "badges": [
+        "طالب في My School"
+      ],
+      "stats": {
+        "completedLessons": 0,
+        "gpa": 95,
+        "attendanceRate": 100,
+        "points": 500
       }
     }
   ],
