@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    font-family: 'Alexandria', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom sleek gold-tinted scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fbfbfa;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ca8a04;
+}

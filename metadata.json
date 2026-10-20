@@ -1,0 +1,6 @@
+{
+  "name": "منصة نماء التعليمية الذكية",
+  "description": "منصة مدرسية متكاملة تضم نظام أخبار، شبكة زملاء، فصول دراسية، مكتبة فيديوهات تفاعلية، ولوحة تحكم ذكية لمتابعة الأداء.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
