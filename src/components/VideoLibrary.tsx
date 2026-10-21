@@ -7,16 +7,14 @@ import {
   Plus, 
   FileText, 
   Check, 
-  Sparkles,
-  Lock,
-  Image as ImageIcon,
-  Video as VideoIcon,
-  MessageSquare,
-  Send,
-  Upload,
-  User as UserIcon
+  Sparkles, 
+  Image as ImageIcon, 
+  Video as VideoIcon, 
+  MessageSquare, 
+  Send
 } from 'lucide-react';
-import { VideoLesson, StudentProgress, User, SubjectCategory, Comment } from '../types';
+import { VideoLesson, StudentProgress, User, SubjectCategory } from '../types';
+import { UserAvatar } from './UserAvatar';
 
 interface VideoLibraryProps {
   videos: VideoLesson[];
@@ -166,14 +164,14 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-amber-200/80">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#7d0d2b]/20">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-amber-600" />
+              <BookOpen className="w-6 h-6 text-[#800020]" />
               مكتبة الدروس والوسائط التعليمية
             </h2>
-            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-[#800020] bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded-full">
               My School
             </span>
           </div>
@@ -192,14 +190,14 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                 }
                 setShowPublishModal(true);
               }}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-700 hover:to-yellow-600 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-md shadow-[#800020]/25 transition-all cursor-pointer whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-rose-300" />
               إضافة فيديو أو صورة لمادتي
             </button>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-[#800020]/25 text-[#800020] text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-[#800020]" />
               <span>متابعة الشروحات وحفظ التقدم</span>
             </div>
           )}
@@ -213,16 +211,16 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
         </div>
       )}
 
-      {/* Subject Filter Bar */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-amber-200/80 rounded-2xl overflow-x-auto text-xs shadow-2xs">
+      {/* Subject Filter Bar in Burgundy & Black */}
+      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-[#7d0d2b]/20 rounded-2xl overflow-x-auto text-xs shadow-2xs">
         {SUBJECT_FILTERS.map(subj => (
           <button
             key={subj}
             onClick={() => setSelectedSubject(subj)}
             className={`px-3.5 py-2 rounded-xl whitespace-nowrap transition-all font-bold cursor-pointer ${
               selectedSubject === subj
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-xs'
-                : 'text-slate-600 hover:text-amber-800 hover:bg-amber-50/50'
+                ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/20'
+                : 'text-slate-600 hover:text-[#800020] hover:bg-rose-50/50'
             }`}
           >
             {subj === 'all' ? 'جميع المواد' : subj}
@@ -232,8 +230,8 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
 
       {/* Empty State when no lessons are uploaded yet */}
       {filteredVideos.length === 0 ? (
-        <div className="bg-white border border-amber-200/80 rounded-3xl p-12 text-center text-slate-500 space-y-4 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+        <div className="bg-white border border-[#7d0d2b]/20 rounded-3xl p-12 text-center text-slate-500 space-y-4 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-[#800020]/25 text-[#800020] flex items-center justify-center mx-auto">
             <BookOpen className="w-8 h-8" />
           </div>
           <div className="space-y-1 max-w-md mx-auto">
@@ -255,136 +253,135 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                 }
                 setShowPublishModal(true);
               }}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-700 hover:to-yellow-600 text-white text-xs font-bold shadow-md shadow-amber-600/20 inline-flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-md shadow-[#800020]/20 inline-flex items-center gap-2 cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              إضافة المحتوى التعليمي الأول الآن
+              <Plus className="w-4 h-4 text-rose-300" />
+              رفع أول محتوى لمادتي
             </button>
           )}
         </div>
       ) : (
-        /* Video / Media Viewport & Concept Deck */
+        /* Video Player Stage */
         currentVideo && (
-          <div className="bg-white border border-amber-200/80 rounded-3xl overflow-hidden shadow-lg">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-3xl overflow-hidden shadow-lg">
             <div className="grid grid-cols-1 lg:grid-cols-12">
               
-              {/* Media Player Column (8 cols) */}
-              <div className="lg:col-span-8 bg-black flex flex-col justify-between">
-                
-                {/* Media Container: Either Video or Image */}
-                <div className="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+              {/* Media Player Screen (8 cols) */}
+              <div className="lg:col-span-8 bg-black flex flex-col justify-between relative">
+                <div className="relative aspect-video w-full bg-slate-950 flex items-center justify-center">
                   {currentVideo.mediaType === 'image' ? (
                     <img
-                      src={currentVideo.mediaData || currentVideo.thumbnail || currentVideo.videoUrl}
+                      src={currentVideo.mediaData || currentVideo.thumbnail}
                       alt={currentVideo.title}
                       className="w-full h-full object-contain"
                       referrerPolicy="no-referrer"
                     />
-                  ) : (
+                  ) : currentVideo.videoUrl && currentVideo.videoUrl.startsWith('http') ? (
                     <video
-                      key={currentVideo.id}
                       controls
-                      poster={currentVideo.thumbnail}
+                      playsInline
                       className="w-full h-full object-contain"
+                      poster={currentVideo.thumbnail}
                       src={currentVideo.videoUrl}
-                    >
-                      متصفحك لا يدعم تشغيل الفيديو.
-                    </video>
+                    />
+                  ) : (
+                    <div className="text-center p-8 space-y-3">
+                      <Play className="w-16 h-16 text-rose-400 mx-auto opacity-70" />
+                      <p className="text-xs text-stone-300 max-w-sm">
+                        هذا الدرس معروض كنموذج تدريبي للمنهج. يمكنك تدوين ملاحظاتك بالجانب وحفظ التقدم.
+                      </p>
+                    </div>
                   )}
+
+                  {/* Top Overlay Badge */}
+                  <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-xs px-3 py-1 rounded-full border border-rose-500/30 text-rose-300 text-xs font-bold">
+                    {currentVideo.subject} · {currentVideo.mediaType === 'image' ? 'صورة توضيحية' : 'فيديو تعليمي'}
+                  </div>
                 </div>
 
-                {/* Player Bottom Bar */}
-                <div className="p-5 bg-stone-900 border-t border-stone-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-white">
-                  <div>
-                    <div className="text-xs text-amber-400 font-bold mb-1 flex items-center gap-2">
-                      <span>{currentVideo.subject}</span>
-                      <span>·</span>
-                      <span>المعلم: {currentVideo.teacherName}</span>
-                      <span>·</span>
-                      <span className="text-stone-400 text-[11px]">{currentVideo.mediaType === 'image' ? 'صورة تعليمية' : 'فيديو مرئي'}</span>
+                {/* Video Info Bottom Bar */}
+                <div className="p-6 bg-[#0e0f13] text-white space-y-4 border-t border-stone-800">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-rose-400 font-bold mb-1 flex items-center gap-2">
+                        <UserAvatar name={currentVideo.teacherName} role="teacher" size="xs" />
+                        <span>بواسطة الأستاذ: {currentVideo.teacherName}</span>
+                        <span>·</span>
+                        <span>{currentVideo.duration}</span>
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-black text-white">
+                        {currentVideo.title}
+                      </h3>
+                      <p className="text-xs text-stone-300 mt-1 leading-relaxed">
+                        {currentVideo.description}
+                      </p>
                     </div>
-                    <h3 className="text-base sm:text-lg font-bold text-white">
-                      {currentVideo.title}
-                    </h3>
-                  </div>
 
-                  <div className="flex items-center gap-2.5">
+                    {/* Quick Completion Button */}
                     <button
                       onClick={() => handleSaveProgress(100, true)}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
                         isCompleted
                           ? 'bg-emerald-600 text-white'
-                          : 'bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700'
+                          : 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white border border-rose-500/40'
                       }`}
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      {isCompleted ? 'تم إتمام الدرس' : 'تحديد كمكتمل'}
-                    </button>
-
-                    <button
-                      onClick={() => handleSaveProgress(Math.min(100, currentProgressPct + 25), currentProgressPct + 25 >= 100)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all cursor-pointer"
-                    >
-                      +25% تقدم
+                      <span>{isCompleted ? 'تم إتمام الدرس بنجاح ✓' : 'وسم الدرس كمكتمل'}</span>
                     </button>
                   </div>
-                </div>
 
-                {/* Progress Slider */}
-                <div className="px-5 pb-4 bg-stone-900 space-y-1.5">
-                  <div className="flex justify-between text-xs text-stone-300 tabular-nums font-medium">
-                    <span>مستوى الإنجاز:</span>
-                    <span className="font-bold text-amber-400">{currentProgressPct}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-stone-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-300 rounded-full ${
-                        currentProgressPct === 100 ? 'bg-emerald-500' : 'bg-amber-500'
-                      }`}
-                      style={{ width: `${currentProgressPct}%` }}
-                    />
+                  {/* Progress Slider */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-stone-400">
+                      <span>نسبة تقدمك في هذا الدرس:</span>
+                      <span className="font-bold text-rose-400">{currentProgressPct}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-stone-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-300 rounded-full ${
+                          currentProgressPct === 100 ? 'bg-emerald-500' : 'bg-[#800020]'
+                        }`}
+                        style={{ width: `${currentProgressPct}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Notes & Comments Deck (4 cols) */}
-              <div className="lg:col-span-4 p-6 bg-white border-t lg:border-t-0 lg:border-r border-amber-200/80 space-y-6 flex flex-col justify-between">
+              {/* Notes & Discussions Column (4 cols) */}
+              <div className="lg:col-span-4 p-6 bg-white border-t lg:border-t-0 lg:border-r border-[#7d0d2b]/20 space-y-6 flex flex-col justify-between">
                 
-                {/* Description & Notes */}
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-xs font-extrabold text-slate-800 mb-1">وصف المحتوى</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      {currentVideo.description}
-                    </p>
-                  </div>
-
-                  {/* Notes Notebook */}
-                  <div className="space-y-2 pt-2 border-t border-amber-100">
-                    <h4 className="text-xs font-extrabold text-slate-800 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-amber-600" />
-                      مفكرتي وتلخيصي للدرس
+                {/* Real User Notes */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-[#800020]" />
+                      مفكرتي وملاحظاتي الخاصة
                     </h4>
-                    <textarea
-                      rows={3}
-                      value={notesText}
-                      onChange={(e) => setNotesText(e.target.value)}
-                      placeholder="سجل ملاحظاتك حول هذا الدرس..."
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 leading-relaxed"
-                    />
-                    <button
-                      onClick={() => handleSaveProgress(currentProgressPct, isCompleted)}
-                      className="w-full py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
-                    >
-                      حفظ الملاحظة
-                    </button>
+                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">
+                      حفظ في السيرفر
+                    </span>
                   </div>
+                  <textarea
+                    rows={4}
+                    placeholder="دوّن استنتاجاتك أو أسئلتك حول هذا الدرس، وستُحفظ في حسابك..."
+                    value={notesText}
+                    onChange={(e) => setNotesText(e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-[#800020] leading-relaxed"
+                  />
+                  <button
+                    onClick={() => handleSaveProgress(currentProgressPct || 50, isCompleted)}
+                    className="w-full py-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                  >
+                    حفظ الملاحظات في قاعدة البيانات
+                  </button>
                 </div>
 
-                {/* Lesson Discussion & Comments */}
-                <div className="space-y-3 pt-3 border-t border-amber-100">
+                {/* Lesson Discussion & Comments with Letter Avatars */}
+                <div className="space-y-3 pt-3 border-t border-stone-100">
                   <h4 className="text-xs font-extrabold text-slate-800 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-amber-600" />
+                    <MessageSquare className="w-4 h-4 text-[#800020]" />
                     استفسارات الطلاب ومناقشة الدرس ({currentVideo.comments?.length || 0})
                   </h4>
 
@@ -395,10 +392,13 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                       currentVideo.comments.map((c) => (
                         <div key={c.id} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
                           <div className="flex items-center justify-between text-[11px]">
-                            <span className="font-bold text-slate-900">{c.userName}</span>
-                            <span className="text-slate-400 text-[10px]">{c.date}</span>
+                            <div className="flex items-center gap-1.5">
+                              <UserAvatar name={c.userName} size="xs" />
+                              <span className="font-bold text-slate-900">{c.userName}</span>
+                            </div>
+                            <span className="text-slate-400 text-[10px] font-mono">{c.date}</span>
                           </div>
-                          <p className="text-slate-600 leading-relaxed text-[11px]">{c.text}</p>
+                          <p className="text-slate-600 leading-relaxed text-[11px] pr-6">{c.text}</p>
                         </div>
                       ))
                     )}
@@ -411,12 +411,12 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                       placeholder="اطرح استفسارك حول هذا الدرس..."
                       value={commentInput}
                       onChange={(e) => setCommentInput(e.target.value)}
-                      className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500"
+                      className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#800020]"
                     />
                     <button
                       type="submit"
                       disabled={!commentInput.trim()}
-                      className="p-2 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] disabled:opacity-40 text-white transition-colors cursor-pointer"
                     >
                       <Send className="w-3.5 h-3.5 ml-0.5" />
                     </button>
@@ -430,7 +430,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
         )
       )}
 
-      {/* Playlist Grid (Only shown when there are uploaded lessons) */}
+      {/* Playlist Grid */}
       {filteredVideos.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-base font-extrabold text-slate-900">
@@ -448,55 +448,49 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                   onClick={() => handleSelectVideo(video)}
                   className={`group cursor-pointer bg-white border rounded-2xl overflow-hidden transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-amber-500 ring-2 ring-amber-500/20 shadow-md'
-                      : 'border-amber-200/80 hover:border-amber-300 shadow-2xs'
+                      ? 'border-[#800020] ring-2 ring-[#800020]/20 shadow-md'
+                      : 'border-stone-200 hover:border-[#800020]/40 shadow-2xs'
                   }`}
                 >
-                  <div className="relative aspect-video w-full bg-stone-100 overflow-hidden flex items-center justify-center">
+                  <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
                     {video.mediaType === 'image' ? (
                       <img
-                        src={video.mediaData || video.thumbnail || video.videoUrl}
+                        src={video.mediaData || video.thumbnail}
                         alt={video.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <div className="w-full h-full bg-stone-900 flex items-center justify-center">
-                        <Play className="w-10 h-10 text-amber-400" />
+                      <div className="w-full h-full bg-black flex items-center justify-center">
+                        <Play className="w-10 h-10 text-rose-400" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-2.5">
-                      <span className="text-[11px] font-mono bg-black/60 backdrop-blur px-2 py-0.5 rounded text-white flex items-center gap-1">
-                        {video.mediaType === 'image' ? <ImageIcon className="w-3 h-3" /> : <VideoIcon className="w-3 h-3" />}
-                        {video.duration}
-                      </span>
+                    <div className="absolute top-2 left-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[11px] font-mono text-white">
+                      {video.duration}
                     </div>
                   </div>
 
-                  <div className="p-4 space-y-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-amber-800 font-bold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                  <div className="p-4 space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-[#800020] font-bold bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded">
                         {video.subject}
                       </span>
-                      <span className="text-slate-400 font-medium">إعداد: {video.teacherName}</span>
+                      <span className="text-slate-400 font-medium">{video.teacherName}</span>
                     </div>
 
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-amber-700 transition-colors line-clamp-1">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#800020] transition-colors line-clamp-1">
                       {video.title}
                     </h4>
 
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                      {video.description}
-                    </p>
-
-                    <div className="space-y-1 pt-2 border-t border-amber-100">
-                      <div className="flex justify-between text-[11px] text-slate-500 tabular-nums">
-                        <span>إنجازك: {pct}%</span>
-                        {prog?.completed && <span className="text-emerald-600 font-bold">مكتمل ✓</span>}
+                    {/* Progress Indicator */}
+                    <div className="space-y-1 pt-2 border-t border-stone-100">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                        <span>نسبة الإنجاز</span>
+                        <span className="font-bold text-slate-700">{pct}%</span>
                       </div>
-                      <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1 bg-stone-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                          className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-[#800020]'}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -509,17 +503,17 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
         </div>
       )}
 
-      {/* Teacher Publish Modal: Add Video or Educational Image to their Subject */}
+      {/* Teacher Publish Modal in Burgundy & Black */}
       {showPublishModal && isTeacher && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-amber-200 rounded-3xl max-w-lg w-full p-6 space-y-4 text-right shadow-2xl animate-fadeIn">
-            <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-[#7d0d2b]/25 rounded-3xl max-w-lg w-full p-6 space-y-4 text-right shadow-2xl animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-[#7d0d2b]/15">
               <h3 className="text-base font-extrabold text-slate-900">
                 إضافة محتوى تعليمي داخل مادة {newSubject}
               </h3>
               <button
                 onClick={() => setShowPublishModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -534,22 +528,22 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                   <button
                     type="button"
                     onClick={() => setContentType('video')}
-                    className={`py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all ${
-                      contentType === 'video' ? 'bg-white text-amber-700 shadow-xs' : 'text-slate-600'
+                    className={`py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      contentType === 'video' ? 'bg-white text-[#800020] shadow-xs' : 'text-slate-600'
                     }`}
                   >
-                    <VideoIcon className="w-4 h-4 text-amber-600" />
+                    <VideoIcon className="w-4 h-4 text-[#800020]" />
                     <span>فيديو تعليمي</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setContentType('image')}
-                    className={`py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all ${
-                      contentType === 'image' ? 'bg-white text-amber-700 shadow-xs' : 'text-slate-600'
+                    className={`py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      contentType === 'image' ? 'bg-white text-[#800020] shadow-xs' : 'text-slate-600'
                     }`}
                   >
-                    <ImageIcon className="w-4 h-4 text-amber-600" />
+                    <ImageIcon className="w-4 h-4 text-[#800020]" />
                     <span>صورة توضيحية / إنفوجرافيك</span>
                   </button>
                 </div>
@@ -563,7 +557,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                   placeholder="مثال: شرح المفاهيم الأساسية وتطبيقاتها"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-medium"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#800020] font-medium"
                 />
               </div>
 
@@ -573,7 +567,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                   <select
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value as SubjectCategory)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-bold"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020] font-bold"
                   >
                     <option value="الفيزياء">الفيزياء</option>
                     <option value="الكيمياء">الكيمياء</option>
@@ -593,7 +587,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                       value={newDuration}
                       onChange={(e) => setNewDuration(e.target.value)}
                       placeholder="15:00"
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                     />
                   </div>
                 )}
@@ -607,7 +601,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                     value={newMediaUrl}
                     onChange={(e) => setNewMediaUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                   />
                 </div>
               ) : (
@@ -617,10 +611,10 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                    className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-[#800020] hover:file:bg-rose-100"
                   />
                   {fileUploadPreview && (
-                    <div className="w-full h-32 rounded-xl overflow-hidden border border-amber-200 bg-stone-100">
+                    <div className="w-full h-32 rounded-xl overflow-hidden border border-[#7d0d2b]/20 bg-stone-100">
                       <img src={fileUploadPreview} alt="Preview" className="w-full h-full object-contain" />
                     </div>
                   )}
@@ -634,7 +628,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder="اكتب النقاط الرئيسية، الأهداف، أو التكليفات المرتبطة بهذا الدرس..."
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 leading-relaxed"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-[#800020] leading-relaxed"
                 />
               </div>
 
@@ -642,13 +636,13 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPublishModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 font-medium"
+                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 font-medium cursor-pointer"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-md shadow-amber-600/20"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white font-bold shadow-md shadow-[#800020]/25 cursor-pointer"
                 >
                   نشر في مكتبة مادة {newSubject}
                 </button>

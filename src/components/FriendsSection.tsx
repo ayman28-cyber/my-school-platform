@@ -16,12 +16,14 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { User, ChatMessage, FIRST_SECONDARY_BRANCHES, SECOND_BACCALAUREATE_BRANCHES } from '../types';
+import { UserAvatar } from './UserAvatar';
 
 interface FriendsSectionProps {
   currentUser: User;
   allUsers: User[];
   friends: User[];
   incomingRequests: { relationId: string; user?: User; createdAt: string }[];
+  outgoingPendingUserIds?: string[];
   messages: ChatMessage[];
   onSendFriendRequest: (recipientId: string) => Promise<void>;
   onRespondRequest: (relationId: string, accept: boolean) => Promise<void>;
@@ -34,6 +36,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
   allUsers,
   friends,
   incomingRequests,
+  outgoingPendingUserIds = [],
   messages,
   onSendFriendRequest,
   onRespondRequest,
@@ -51,6 +54,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
   const [requestSentFeedback, setRequestSentFeedback] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshSuccess, setRefreshSuccess] = useState(false);
+  const [localPendingIds, setLocalPendingIds] = useState<string[]>([]);
 
   const friendIds = friends.map(f => f.id);
 
@@ -59,9 +63,9 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
   const girlsCount = allUsers.filter(u => u.role === 'student' && u.gender === 'female').length;
   const teachersCount = allUsers.filter(u => u.role === 'teacher').length;
 
-  // Filter users strictly by the 3 main categories requested: بنين / بنات / معلمين
+  // Filter users strictly by the 3 main categories: بنين / بنات / معلمين
   const categorizedUsers = allUsers.filter(u => {
-    if (u.id === currentUser.id) return false; // Don't show myself in the directory list
+    if (u.id === currentUser.id) return false;
 
     if (activeDirectoryTab === 'teachers') {
       return u.role === 'teacher';
@@ -78,7 +82,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
     return true;
   });
 
-  // Apply search, grade, and specific branch filters (1/1 to 1/12 or 2/1 to 2/9)
+  // Apply search, grade, and specific branch filters
   const filteredUsers = categorizedUsers.filter(u => {
     const matchesSearch = 
       u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,9 +118,10 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
   };
 
   const handleSendRequest = async (recipientId: string, recipientName: string) => {
+    setLocalPendingIds(prev => Array.from(new Set([...prev, recipientId])));
     await onSendFriendRequest(recipientId);
     setRequestSentFeedback(`تم إرسال طلب الصداقة بنجاح إلى ${recipientName}`);
-    setTimeout(() => setRequestSentFeedback(null), 3000);
+    setTimeout(() => setRequestSentFeedback(null), 3500);
   };
 
   const handleSendChat = async (e: React.FormEvent) => {
@@ -137,63 +142,63 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
     <div className="space-y-6 animate-fadeIn text-right" dir="rtl">
       
       {/* Top Header & Sync Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-amber-200/80">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#7d0d2b]/20">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-700">
-              <Users2 className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-black/80 border border-rose-900/60 flex items-center justify-center text-rose-300">
+              <Users2 className="w-5 h-5 text-rose-400" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                شبكة الزملاء والمعلمين
-              </h2>
-              <span className="text-xs text-amber-800 font-bold">
-                سجل الطلاب والمعلمين المعتمدين في My School · مقسم حسب الصفوف والشعب
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  شبكة الزملاء والتواصل الصفي
+                </h1>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-[#800020] border border-[#800020]/25">
+                  قاعدة بيانات المدرسة الحية
+                </span>
+              </div>
+              <span className="text-xs text-[#800020] font-bold">
+                {allUsers.length} مستخدم مسجل في المدرسة · مقسمين حسب البنين والبنات والمعلمين
               </span>
             </div>
           </div>
-          <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            كل طالب أو معلم يسجل دخوله باسمه يتم حفظه تلقائياً في السيرفر ليكون مرئياً ومتاحاً لجميع الزملاء للدراسة والمراسلة وإضافة الأصدقاء.
-          </p>
         </div>
 
-        {/* Search & Live Refresh Actions */}
-        <div className="flex items-center gap-2.5 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-2.5" />
+        {/* Search & Refresh Actions */}
+        <div className="flex items-center gap-2.5">
+          <div className="relative w-full sm:w-64">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-2.5" />
             <input
               type="text"
-              placeholder="ابحث بالاسم أو الشعبة (مثال: 1/4 أو 2/3)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-stone-300 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 font-medium"
+              placeholder="ابحث بالاسم أو الشعبة..."
+              className="w-full bg-white border border-stone-300 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#800020] font-medium"
             />
           </div>
 
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-amber-50 border border-amber-200 text-amber-800 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:border-amber-400 shrink-0"
-            title="تحديث قائمة المستخدمين الآن لجلب المسجلين الجدد"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 border border-[#800020]/25 text-[#800020] font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:border-[#800020] shrink-0"
+            title="تحديث قائمة المستخدمين الآن من السيرفر"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-amber-600 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>{isRefreshing ? 'جاري التحديث...' : refreshSuccess ? 'تم التحديث ✓' : 'تحديث القائمة'}</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-[#800020] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">تحديث الشبكة</span>
           </button>
         </div>
       </div>
 
-      {/* User's Own Visibility Confirmation Card */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 via-yellow-50/50 to-white border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      {/* User's Own Visibility Confirmation Card with Letter Avatar */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50/70 via-white to-rose-50/30 border border-[#7d0d2b]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-amber-400 shrink-0"
-              referrerPolicy="no-referrer"
-            />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-          </div>
+          <UserAvatar
+            name={currentUser.name}
+            role={currentUser.role}
+            size="md"
+            showStatus
+            statusOnline
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-slate-900">{currentUser.name}</span>
@@ -202,7 +207,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                 مسجل ومحفوظ في السيرفر
               </span>
             </div>
-            <span className="text-[11px] text-amber-900 font-medium">
+            <span className="text-[11px] text-[#800020] font-medium">
               حسابك ظاهر لباقي الزملاء في قسم ({currentUser.role === 'teacher' ? 'المعلمين' : currentUser.gender === 'female' ? 'البنات' : 'البنين'})
               {currentUser.schoolClass ? ` · شعبة ${currentUser.schoolClass}` : ''}
               {currentUser.gradeOrSubject ? ` · ${currentUser.gradeOrSubject}` : ''}
@@ -210,133 +215,127 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
           </div>
         </div>
 
-        <div className="text-[11px] text-slate-500 bg-white/80 border border-amber-100 px-3 py-1 rounded-xl self-start sm:self-center font-mono">
-          المعرف الأكاديمي: {currentUser.id}
+        <div className="text-[11px] text-slate-500 bg-white/80 border border-stone-200 px-3 py-1 rounded-xl self-start sm:self-center font-mono">
+          معرّف حسابك: {currentUser.id.slice(0, 10)}...
         </div>
       </div>
 
       {requestSentFeedback && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs flex items-center justify-between font-bold animate-fadeIn">
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center justify-between animate-fadeIn">
           <span>{requestSentFeedback}</span>
-          <Check className="w-4 h-4 text-emerald-600" />
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
         </div>
       )}
 
-      {/* The 3 Main Category Tabs (بنين / بنات / معلمين) */}
+      {/* 3 Main Directory Category Tabs in Burgundy & Black: بنين / بنات / معلمين */}
       <div className="space-y-3">
-        <div className="grid grid-cols-3 gap-2 p-1.5 bg-stone-100 rounded-2xl border border-stone-200">
-          
-          {/* Tab 1: بنين */}
+        <div className="grid grid-cols-3 gap-2 p-1.5 bg-stone-100 rounded-2xl border border-stone-200 text-xs font-bold">
           <button
             onClick={() => {
               setActiveDirectoryTab('boys');
               setSelectedBranchFilter('all');
             }}
-            className={`py-3 px-2 rounded-xl font-extrabold text-xs transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 ${
+            className={`py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeDirectoryTab === 'boys'
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-md shadow-amber-600/20'
-                : 'text-slate-700 hover:text-slate-900 hover:bg-white/50'
+                ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/25'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
             }`}
           >
             <GraduationCap className="w-4 h-4" />
-            <span>قسم البنين</span>
-            <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
-              activeDirectoryTab === 'boys' ? 'bg-black/20 text-white' : 'bg-stone-200 text-slate-700'
+            <span>قسم البنين (الطلاب)</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+              activeDirectoryTab === 'boys' ? 'bg-white/20 text-white' : 'bg-stone-200 text-slate-700'
             }`}>
               {boysCount}
             </span>
           </button>
 
-          {/* Tab 2: بنات */}
           <button
             onClick={() => {
               setActiveDirectoryTab('girls');
               setSelectedBranchFilter('all');
             }}
-            className={`py-3 px-2 rounded-xl font-extrabold text-xs transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 ${
+            className={`py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeDirectoryTab === 'girls'
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-md shadow-amber-600/20'
-                : 'text-slate-700 hover:text-slate-900 hover:bg-white/50'
+                ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/25'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
             }`}
           >
-            <GraduationCap className="w-4 h-4" />
-            <span>قسم البنات</span>
-            <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
-              activeDirectoryTab === 'girls' ? 'bg-black/20 text-white' : 'bg-stone-200 text-slate-700'
+            <BookOpen className="w-4 h-4" />
+            <span>قسم البنات (الطالبات)</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+              activeDirectoryTab === 'girls' ? 'bg-white/20 text-white' : 'bg-stone-200 text-slate-700'
             }`}>
               {girlsCount}
             </span>
           </button>
 
-          {/* Tab 3: معلمين */}
           <button
             onClick={() => {
               setActiveDirectoryTab('teachers');
               setSelectedBranchFilter('all');
             }}
-            className={`py-3 px-2 rounded-xl font-extrabold text-xs transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 ${
+            className={`py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeDirectoryTab === 'teachers'
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-md shadow-amber-600/20'
-                : 'text-slate-700 hover:text-slate-900 hover:bg-white/50'
+                ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/25'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
-            <span>قسم المعلمين</span>
-            <span className={`text-[10px] px-2 py-0.2 rounded-full font-mono font-bold ${
-              activeDirectoryTab === 'teachers' ? 'bg-black/20 text-white' : 'bg-stone-200 text-slate-700'
+            <ShieldCheck className="w-4 h-4" />
+            <span>هيئة التدريس (المعلمون)</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+              activeDirectoryTab === 'teachers' ? 'bg-white/20 text-white' : 'bg-stone-200 text-slate-700'
             }`}>
               {teachersCount}
             </span>
           </button>
         </div>
 
-        {/* Branch Filter Component for Students (بنين / بنات) */}
-        {activeDirectoryTab !== 'teachers' && (
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-4 shadow-xs space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-amber-100">
-              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                تصفية حسب الصفوف والشعب المعتمدة:
+        {/* Grade & Branch Filter Bar */}
+        {(activeDirectoryTab === 'boys' || activeDirectoryTab === 'girls') && (
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-4 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-stone-100">
+              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#800020]" />
+                تصفية الطلاب حسب الصف والشعبة الدراسية المعتمدة:
               </span>
 
-              {/* Grade Selector Tabs */}
-              <div className="flex items-center gap-1.5">
+              {/* Grade Selector Pills */}
+              <div className="flex items-center gap-1.5 text-xs font-semibold">
                 <button
                   onClick={() => {
                     setSelectedGradeFilter('all');
                     setSelectedBranchFilter('all');
                   }}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                     selectedGradeFilter === 'all'
-                      ? 'bg-amber-600 text-white'
+                      ? 'bg-[#800020] text-white'
                       : 'bg-stone-100 text-slate-600 hover:bg-stone-200'
                   }`}
                 >
-                  الكل
+                  جميع الصفوف
                 </button>
-
                 <button
                   onClick={() => {
                     setSelectedGradeFilter('first_secondary');
                     setSelectedBranchFilter('all');
                   }}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                     selectedGradeFilter === 'first_secondary'
-                      ? 'bg-amber-600 text-white'
+                      ? 'bg-[#800020] text-white'
                       : 'bg-stone-100 text-slate-600 hover:bg-stone-200'
                   }`}
                 >
                   أولى ثانوي (12 شعبة)
                 </button>
-
                 <button
                   onClick={() => {
                     setSelectedGradeFilter('second_baccalaureate');
                     setSelectedBranchFilter('all');
                   }}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                     selectedGradeFilter === 'second_baccalaureate'
-                      ? 'bg-amber-600 text-white'
+                      ? 'bg-[#800020] text-white'
                       : 'bg-stone-100 text-slate-600 hover:bg-stone-200'
                   }`}
                 >
@@ -345,23 +344,23 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
               </div>
             </div>
 
-            {/* Individual Branch Buttons */}
-            <div>
-              {/* If First Secondary is selected or All */}
+            {/* Visual Quick Branch Grid for Fast Filtering */}
+            <div className="space-y-2">
+              {/* First Secondary Branches: 1/1 to 1/12 */}
               {(selectedGradeFilter === 'all' || selectedGradeFilter === 'first_secondary') && (
-                <div className="space-y-1.5 mb-2.5">
-                  <span className="text-[11px] font-bold text-amber-800 block">
-                    شعب صف أولى ثانوي (1/1 إلى 1/12):
+                <div className="space-y-1">
+                  <span className="text-[11px] font-bold text-[#800020] block">
+                    شعب أولى ثانوي (1/1 إلى 1/12):
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {FIRST_SECONDARY_BRANCHES.map(br => (
                       <button
                         key={br}
                         onClick={() => setSelectedBranchFilter(selectedBranchFilter === br ? 'all' : br)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                        className={`px-2 py-1 rounded-md text-[11px] font-bold font-mono transition-all cursor-pointer ${
                           selectedBranchFilter === br
-                            ? 'bg-amber-500 text-white shadow-xs'
-                            : 'bg-stone-100 hover:bg-amber-100 text-slate-700 border border-stone-200'
+                            ? 'bg-[#800020] text-white shadow-xs'
+                            : 'bg-stone-100 hover:bg-rose-100 text-slate-700 border border-stone-200'
                         }`}
                       >
                         {br}
@@ -371,21 +370,21 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                 </div>
               )}
 
-              {/* If Second Baccalaureate is selected or All */}
+              {/* Second Baccalaureate Branches: 2/1 to 2/9 */}
               {(selectedGradeFilter === 'all' || selectedGradeFilter === 'second_baccalaureate') && (
-                <div className="space-y-1.5">
-                  <span className="text-[11px] font-bold text-amber-800 block">
-                    شعب صف ثانية بكلوريا (2/1 إلى 2/9):
+                <div className="space-y-1 pt-1">
+                  <span className="text-[11px] font-bold text-[#800020] block">
+                    شعب ثانية بكلوريا (2/1 إلى 2/9):
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {SECOND_BACCALAUREATE_BRANCHES.map(br => (
                       <button
                         key={br}
                         onClick={() => setSelectedBranchFilter(selectedBranchFilter === br ? 'all' : br)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                        className={`px-2 py-1 rounded-md text-[11px] font-bold font-mono transition-all cursor-pointer ${
                           selectedBranchFilter === br
-                            ? 'bg-amber-500 text-white shadow-xs'
-                            : 'bg-stone-100 hover:bg-amber-100 text-slate-700 border border-stone-200'
+                            ? 'bg-[#800020] text-white shadow-xs'
+                            : 'bg-stone-100 hover:bg-rose-100 text-slate-700 border border-stone-200'
                         }`}
                       >
                         {br}
@@ -397,8 +396,8 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
 
               {selectedBranchFilter !== 'all' && (
                 <div className="flex items-center justify-between pt-2 mt-2 border-t border-stone-100 text-[11px]">
-                  <span className="text-amber-800 font-bold">
-                    تمت التصفية لعرض طلاب شعبة: <strong className="font-mono text-amber-700">{selectedBranchFilter}</strong>
+                  <span className="text-[#800020] font-bold">
+                    تمت التصفية لعرض طلاب شعبة: <strong className="font-mono text-[#800020]">{selectedBranchFilter}</strong>
                   </span>
                   <button
                     onClick={() => setSelectedBranchFilter('all')}
@@ -413,11 +412,11 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
         )}
       </div>
 
-      {/* Incoming Requests Section if any */}
+      {/* Incoming Requests Section with Letter Avatars */}
       {incomingRequests.length > 0 && (
-        <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 space-y-3">
-          <h3 className="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
-            <UserPlus className="w-4 h-4 text-amber-700" />
+        <div className="bg-rose-50/70 border border-[#7d0d2b]/25 rounded-2xl p-4 space-y-3">
+          <h3 className="text-xs font-extrabold text-[#800020] flex items-center gap-1.5">
+            <UserPlus className="w-4 h-4 text-[#800020]" />
             طلبات الصداقة الواردة إليك ({incomingRequests.length})
           </h3>
 
@@ -425,20 +424,19 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
             {incomingRequests.map((req) => (
               <div
                 key={req.relationId}
-                className="bg-white border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3 text-xs shadow-2xs"
+                className="bg-white border border-[#7d0d2b]/20 p-3 rounded-xl flex items-center justify-between gap-3 text-xs shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <img
-                    src={req.user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-                    alt={req.user?.name || 'مستخدم'}
-                    className="w-8 h-8 rounded-full object-cover ring-1 ring-amber-300 shrink-0"
-                    referrerPolicy="no-referrer"
+                  <UserAvatar
+                    name={req.user?.name || 'مستخدم'}
+                    role={req.user?.role}
+                    size="sm"
                   />
                   <div className="min-w-0">
                     <span className="font-bold text-slate-900 truncate block">
                       {req.user?.name}
                     </span>
-                    <span className="text-[10px] text-amber-800 block truncate font-mono">
+                    <span className="text-[10px] text-[#800020] block truncate font-mono">
                       {req.user?.schoolClass ? `شعبة ${req.user.schoolClass}` : req.user?.gradeOrSubject}
                     </span>
                   </div>
@@ -472,14 +470,14 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
         {/* Left Column (5 cols): Directory Roster & Friends */}
         <div className="lg:col-span-5 space-y-6">
           
-          {/* Active Friends List */}
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-5 space-y-3 shadow-xs">
+          {/* Active Friends List with Letter Avatars */}
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-5 space-y-3 shadow-xs">
             <h3 className="text-sm font-extrabold text-slate-900 flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-emerald-600" />
                 أصدقاؤك المقبولون في My School
               </span>
-              <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold text-[#800020] bg-rose-50 px-2 py-0.5 rounded-full border border-[#800020]/20">
                 {friends.length} صديق
               </span>
             </h3>
@@ -496,44 +494,42 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                     onClick={() => setActiveChatUser(friend)}
                     className={`p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between text-xs ${
                       activeChatUser?.id === friend.id
-                        ? 'bg-amber-50 border border-amber-300 shadow-2xs'
-                        : 'bg-stone-50/70 border border-stone-200 hover:border-amber-300'
+                        ? 'bg-rose-50/70 border border-[#800020]/40 shadow-2xs'
+                        : 'bg-stone-50/70 border border-stone-200 hover:border-[#800020]/40'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative">
-                        <img
-                          src={friend.avatar}
-                          alt={friend.name}
-                          className="w-9 h-9 rounded-full object-cover ring-1 ring-amber-300"
-                          referrerPolicy="no-referrer"
-                        />
-                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-                      </div>
+                      <UserAvatar
+                        name={friend.name}
+                        role={friend.role}
+                        size="sm"
+                        showStatus
+                        statusOnline
+                      />
                       <div className="min-w-0">
                         <div className="font-bold text-slate-900 truncate">{friend.name}</div>
-                        <div className="text-[11px] text-amber-800 truncate font-mono">
+                        <div className="text-[11px] text-[#800020] truncate font-mono">
                           {friend.schoolClass ? `شعبة ${friend.schoolClass}` : friend.gradeOrSubject} · {friend.gender === 'female' ? 'بنات' : 'بنين'}
                         </div>
                       </div>
                     </div>
 
-                    <MessageCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <MessageCircle className="w-4 h-4 text-[#800020] shrink-0" />
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Directory Users List (بنين / بنات / معلمين) */}
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-5 space-y-3 shadow-xs">
+          {/* Directory Users List with Letter Avatars */}
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-5 space-y-3 shadow-xs">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
                 {activeDirectoryTab === 'boys' && 'سجل الطلاب (قسم البنين)'}
                 {activeDirectoryTab === 'girls' && 'سجل الطالبات (قسم البنات)'}
                 {activeDirectoryTab === 'teachers' && 'سجل هيئة التدريس (المعلمين)'}
               </h3>
-              <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold text-[#800020] bg-rose-50 px-2 py-0.5 rounded-full border border-[#800020]/20">
                 {filteredUsers.length} متاح
               </span>
             </div>
@@ -549,7 +545,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                 {selectedBranchFilter !== 'all' && (
                   <button
                     onClick={() => setSelectedBranchFilter('all')}
-                    className="text-xs text-amber-700 font-bold hover:underline cursor-pointer"
+                    className="text-xs text-[#800020] font-bold hover:underline cursor-pointer"
                   >
                     عرض جميع الشعب
                   </button>
@@ -563,27 +559,25 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                   return (
                     <div
                       key={user.id}
-                      className="p-3 rounded-xl bg-stone-50 border border-stone-200 hover:border-amber-300 transition-colors flex items-center justify-between text-xs"
+                      className="p-3 rounded-xl bg-stone-50 border border-stone-200 hover:border-[#800020]/40 transition-colors flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="relative shrink-0">
-                          <img
-                            src={user.avatar}
-                            alt={user.name}
-                            className="w-10 h-10 rounded-full object-cover ring-1 ring-amber-200"
-                            referrerPolicy="no-referrer"
-                          />
-                          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-                        </div>
+                        <UserAvatar
+                          name={user.name}
+                          role={user.role}
+                          size="md"
+                          showStatus
+                          statusOnline
+                        />
                         <div className="min-w-0">
                           <div className="font-bold text-slate-900 truncate text-xs">{user.name}</div>
                           
-                          <div className="text-[11px] text-amber-800 font-medium truncate flex items-center gap-1.5 mt-0.5">
+                          <div className="text-[11px] text-[#800020] font-medium truncate flex items-center gap-1.5 mt-0.5">
                             <span>{user.gradeOrSubject}</span>
                             {user.schoolClass && (
                               <>
                                 <span>·</span>
-                                <span className="font-mono bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                <span className="font-mono bg-rose-100 text-[#800020] px-1.5 py-0.5 rounded text-[10px] font-bold">
                                   {user.role === 'student' ? `شعبة ${user.schoolClass}` : user.schoolClass}
                                 </span>
                               </>
@@ -596,17 +590,22 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                         {isFriend ? (
                           <button
                             onClick={() => setActiveChatUser(user)}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100"
+                            className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition-colors"
                           >
                             <MessageCircle className="w-3.5 h-3.5" />
                             <span>مراسلة</span>
                           </button>
+                        ) : (outgoingPendingUserIds.includes(user.id) || localPendingIds.includes(user.id)) ? (
+                          <div className="px-3 py-1.5 rounded-lg bg-rose-50 text-[#800020] border border-[#800020]/30 text-[11px] font-bold flex items-center gap-1 select-none shadow-2xs">
+                            <Sparkles className="w-3 h-3 text-[#800020] animate-pulse" />
+                            <span>طلب معلق ⏳</span>
+                          </div>
                         ) : (
                           <button
                             onClick={() => handleSendRequest(user.id, user.name)}
-                            className="px-3 py-1.5 rounded-lg bg-white hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-300 font-bold transition-colors text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
+                            className="px-3 py-1.5 rounded-lg bg-white hover:bg-gradient-to-r hover:from-[#5e091e] hover:to-[#800020] text-[#800020] hover:text-white border border-[#800020]/30 font-bold transition-all text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs active:scale-95"
                           >
-                            <UserPlus className="w-3 h-3 text-amber-600 group-hover:text-white" />
+                            <UserPlus className="w-3 h-3" />
                             <span>إضافة صديق</span>
                           </button>
                         )}
@@ -620,39 +619,37 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
 
         </div>
 
-        {/* Right Column (7 cols): Live Study Chat */}
+        {/* Right Column (7 cols): Live Study Chat with Letter Avatar */}
         <div className="lg:col-span-7">
-          <div className="bg-white border border-amber-200/80 rounded-2xl h-[560px] flex flex-col justify-between overflow-hidden shadow-xs">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl h-[560px] flex flex-col justify-between overflow-hidden shadow-xs">
             
             {/* Chat Header */}
             {activeChatUser ? (
-              <div className="p-4 bg-stone-50 border-b border-amber-100 flex items-center justify-between">
+              <div className="p-4 bg-stone-50 border-b border-[#7d0d2b]/15 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <img
-                      src={activeChatUser.avatar}
-                      alt={activeChatUser.name}
-                      className="w-10 h-10 rounded-full object-cover ring-2 ring-amber-300"
-                      referrerPolicy="no-referrer"
-                    />
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-                  </div>
+                  <UserAvatar
+                    name={activeChatUser.name}
+                    role={activeChatUser.role}
+                    size="md"
+                    showStatus
+                    statusOnline
+                  />
                   <div>
                     <h4 className="text-sm font-extrabold text-slate-900 leading-tight">{activeChatUser.name}</h4>
-                    <span className="text-[11px] text-amber-800 font-medium">
+                    <span className="text-[11px] text-[#800020] font-medium">
                       {activeChatUser.schoolClass ? `شعبة ${activeChatUser.schoolClass}` : activeChatUser.gradeOrSubject} · متصل الآن للمذاكرة
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs text-amber-700 font-bold hidden sm:inline bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                <span className="text-xs text-[#800020] font-bold hidden sm:inline bg-rose-50 border border-[#800020]/25 px-2.5 py-1 rounded-full">
                   غرفة المذاكرة والتفاعل المباشر
                 </span>
               </div>
             ) : (
-              <div className="p-4 bg-stone-50 border-b border-amber-100 text-xs text-slate-500 font-medium flex items-center justify-between">
+              <div className="p-4 bg-stone-50 border-b border-stone-200 text-xs text-slate-500 font-medium flex items-center justify-between">
                 <span>اختر زميلاً أو صديقاً من القائمة لبدء المحادثة والمذاكرة المشتركة</span>
-                <Sparkles className="w-4 h-4 text-amber-500" />
+                <Sparkles className="w-4 h-4 text-[#800020]" />
               </div>
             )}
 
@@ -680,7 +677,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                       <div
                         className={`max-w-md px-4 py-2.5 rounded-2xl text-xs leading-relaxed font-medium ${
                           isMe
-                            ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white rounded-br-none shadow-xs'
+                            ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white rounded-br-none shadow-md shadow-[#800020]/20'
                             : 'bg-white text-slate-800 rounded-bl-none border border-stone-200 shadow-2xs'
                         }`}
                       >
@@ -697,18 +694,18 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
 
             {/* Chat Input */}
             {activeChatUser && (
-              <form onSubmit={handleSendChat} className="p-3 bg-white border-t border-amber-100 flex items-center gap-2">
+              <form onSubmit={handleSendChat} className="p-3 bg-white border-t border-[#7d0d2b]/15 flex items-center gap-2">
                 <input
                   type="text"
                   placeholder={`اكتب رسالة دراسية إلى ${activeChatUser.name}...`}
                   value={msgInput}
                   onChange={(e) => setMsgInput(e.target.value)}
-                  className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 font-medium"
+                  className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#800020] font-medium"
                 />
                 <button
                   type="submit"
                   disabled={!msgInput.trim()}
-                  className="p-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white transition-colors cursor-pointer"
+                  className="p-2.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] disabled:opacity-40 text-white transition-colors cursor-pointer"
                 >
                   <Send className="w-4 h-4 ml-0.5" />
                 </button>

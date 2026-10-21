@@ -7,11 +7,12 @@ import {
   PlusCircle, 
   Lock, 
   CheckCircle2, 
-  Sparkles,
+  Sparkles, 
   ShieldAlert,
   Calendar
 } from 'lucide-react';
 import { NewsItem, User as UserModel, SubjectCategory } from '../types';
+import { UserAvatar } from './UserAvatar';
 
 interface NewsSectionProps {
   newsList: NewsItem[];
@@ -96,14 +97,14 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
     <div className="space-y-8 animate-fadeIn">
       
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-amber-200/80">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[#7d0d2b]/20">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-              <Newspaper className="w-6 h-6 text-amber-600" />
+              <Newspaper className="w-6 h-6 text-[#800020]" />
               أخبار المواد والأنشطة الأكاديمية
             </h2>
-            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-[#800020] bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded-full">
               My School
             </span>
           </div>
@@ -117,14 +118,14 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
           {isTeacher ? (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-700 hover:to-yellow-600 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-md shadow-[#800020]/25 transition-all cursor-pointer whitespace-nowrap"
             >
-              <PlusCircle className="w-4 h-4" />
+              <PlusCircle className="w-4 h-4 text-rose-300" />
               نشر خبر جديد كمعلم
             </button>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
-              <Lock className="w-3.5 h-3.5 text-amber-600" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-[#800020]/25 text-[#800020] text-xs font-semibold">
+              <Lock className="w-3.5 h-3.5 text-[#800020]" />
               <span>نشر الأخبار مقتصر على المعلمين</span>
             </div>
           )}
@@ -142,16 +143,16 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
         </div>
       )}
 
-      {/* Categories Bar (Requested 7 Subject Categories) */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-amber-200/80 rounded-2xl overflow-x-auto text-xs shadow-2xs">
+      {/* Categories Bar */}
+      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-[#7d0d2b]/20 rounded-2xl overflow-x-auto text-xs shadow-2xs">
         {NEWS_CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
             className={`px-3.5 py-2 rounded-xl whitespace-nowrap transition-all font-bold cursor-pointer ${
               selectedCategory === cat
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-xs'
-                : 'text-slate-600 hover:text-amber-800 hover:bg-amber-50/50'
+                ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/20'
+                : 'text-slate-600 hover:text-[#800020] hover:bg-rose-50/50'
             }`}
           >
             {cat === 'all' ? 'جميع المواد' : `أخبار ${cat}`}
@@ -165,8 +166,8 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
         {/* Main Feed Column (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
           {filteredNews.length === 0 ? (
-            <div className="bg-white border border-amber-200/80 rounded-3xl p-12 text-center text-slate-500 space-y-3 shadow-xs">
-              <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+            <div className="bg-white border border-[#7d0d2b]/20 rounded-3xl p-12 text-center text-slate-500 space-y-3 shadow-xs">
+              <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-[#800020]/25 text-[#800020] flex items-center justify-center mx-auto">
                 <Newspaper className="w-8 h-8" />
               </div>
               <div className="space-y-1 max-w-md mx-auto">
@@ -183,9 +184,9 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               {isTeacher && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-700 hover:to-yellow-600 text-white text-xs font-bold shadow-md shadow-amber-600/20 inline-flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-md shadow-[#800020]/20 inline-flex items-center gap-2 cursor-pointer"
                 >
-                  <PlusCircle className="w-4 h-4" />
+                  <PlusCircle className="w-4 h-4 text-rose-300" />
                   نشر أول خبر الآن
                 </button>
               )}
@@ -194,7 +195,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             filteredNews.map((post) => (
               <article
                 key={post.id}
-                className="bg-white border border-amber-200/80 rounded-2xl overflow-hidden shadow-xs hover:border-amber-300 transition-all flex flex-col justify-between"
+                className="bg-white border border-[#7d0d2b]/20 rounded-2xl overflow-hidden shadow-xs hover:border-[#800020]/40 transition-all flex flex-col justify-between"
               >
                 {post.imageUrl && (
                   <div className="aspect-[21/9] w-full overflow-hidden bg-stone-100">
@@ -208,11 +209,16 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 )}
 
                 <div className="p-6 space-y-3">
-                  {/* Clean Metadata without Pills */}
-                  <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                    <span className="text-amber-800 font-bold">{post.category}</span>
+                  {/* Clean Metadata with Letter Avatar */}
+                  <div className="flex items-center gap-2.5 text-xs text-slate-500 font-medium">
+                    <UserAvatar
+                      name={post.author}
+                      role="teacher"
+                      size="xs"
+                    />
+                    <span className="text-[#800020] font-bold">{post.category}</span>
                     <span aria-hidden="true">·</span>
-                    <span>{post.author}</span>
+                    <span className="font-bold text-slate-800">{post.author}</span>
                     <span aria-hidden="true">·</span>
                     <span>{post.date}</span>
                   </div>
@@ -227,7 +233,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
                   {/* Clean Tags */}
                   {post.tags && (
-                    <div className="flex items-center gap-2 text-xs text-amber-700 pt-1">
+                    <div className="flex items-center gap-2 text-xs text-[#800020] pt-1 font-semibold">
                       {post.tags.map((tag, i) => (
                         <span key={i}>#{tag}</span>
                       ))}
@@ -236,7 +242,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 </div>
 
                 {/* Interaction Footer */}
-                <div className="px-6 py-3.5 bg-stone-50/70 border-t border-amber-100 flex items-center justify-between text-xs text-slate-500">
+                <div className="px-6 py-3.5 bg-stone-50/70 border-t border-[#7d0d2b]/15 flex items-center justify-between text-xs text-slate-500">
                   <div className="flex items-center gap-6">
                     <button
                       onClick={() => onLike(post.id)}
@@ -249,22 +255,22 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
                     <button
                       onClick={() => setOpenCommentsId(openCommentsId === post.id ? null : post.id)}
-                      className="flex items-center gap-1.5 hover:text-amber-700 transition-colors font-bold cursor-pointer"
+                      className="flex items-center gap-1.5 hover:text-[#800020] transition-colors font-bold cursor-pointer"
                     >
-                      <MessageSquare className="w-4 h-4 text-amber-600" />
+                      <MessageSquare className="w-4 h-4 text-[#800020]" />
                       <span className="tabular-nums">{post.comments.length}</span>
                       <span className="hidden sm:inline">تعليقات</span>
                     </button>
                   </div>
 
-                  <span className="text-[11px] text-amber-800 font-bold">
+                  <span className="text-[11px] text-[#800020] font-bold">
                     {post.authorRole}
                   </span>
                 </div>
 
-                {/* Collapsible Comments */}
+                {/* Collapsible Comments with Letter Avatars */}
                 {openCommentsId === post.id && (
-                  <div className="p-6 bg-stone-50 border-t border-amber-100 space-y-4 animate-fadeIn">
+                  <div className="p-6 bg-stone-50 border-t border-[#7d0d2b]/15 space-y-4 animate-fadeIn">
                     <h4 className="text-xs font-bold text-slate-800">
                       مناقشات الطلاب والأساتذة ({post.comments.length})
                     </h4>
@@ -274,12 +280,18 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                     ) : (
                       <div className="space-y-2.5">
                         {post.comments.map((c) => (
-                          <div key={c.id} className="p-3 rounded-xl bg-white border border-stone-200 text-xs space-y-1">
+                          <div key={c.id} className="p-3 rounded-xl bg-white border border-stone-200 text-xs space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-slate-900">{c.userName}</span>
-                              <span className="text-[10px] text-slate-400">{c.date}</span>
+                              <div className="flex items-center gap-2">
+                                <UserAvatar
+                                  name={c.userName}
+                                  size="xs"
+                                />
+                                <span className="font-bold text-slate-900">{c.userName}</span>
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-mono">{c.date}</span>
                             </div>
-                            <p className="text-slate-600 leading-relaxed">{c.text}</p>
+                            <p className="text-slate-600 leading-relaxed pr-7">{c.text}</p>
                           </div>
                         ))}
                       </div>
@@ -293,11 +305,11 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                         value={commentInputs[post.id] || ''}
                         onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
                         onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit(post.id)}
-                        className="flex-1 bg-white border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500"
+                        className="flex-1 bg-white border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#800020]"
                       />
                       <button
                         onClick={() => handleCommentSubmit(post.id)}
-                        className="p-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white transition-colors cursor-pointer"
+                        className="p-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white transition-colors cursor-pointer"
                       >
                         <Send className="w-4 h-4 ml-0.5" />
                       </button>
@@ -311,30 +323,30 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
         {/* Sidebar Info (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
             <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-amber-600" />
+              <Calendar className="w-4 h-4 text-[#800020]" />
               التقويم المدرسي لمواد My School
             </h3>
 
             <div className="space-y-2.5 text-xs">
               <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-0.5">
-                <span className="text-amber-800 font-bold block">قسم البرمجة والحاسب</span>
+                <span className="text-[#800020] font-bold block">قسم البرمجة والحاسب</span>
                 <span className="text-slate-700">ورشة تطوير التطبيقات والذكاء الاصطناعي الأربعاء القادم</span>
               </div>
               <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-0.5">
-                <span className="text-amber-800 font-bold block">قسم الفيزياء والكيمياء</span>
+                <span className="text-[#800020] font-bold block">قسم الفيزياء والكيمياء</span>
                 <span className="text-slate-700">التجارب المعملية المركزية للأسبوع الثاني</span>
               </div>
               <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-0.5">
-                <span className="text-amber-800 font-bold block">قسم اللغة العربية والإنجليزية</span>
+                <span className="text-[#800020] font-bold block">قسم اللغة العربية والإنجليزية</span>
                 <span className="text-slate-700">مسابقة المناظرات اللغوية والإلقاء</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-6 space-y-2 text-xs text-slate-600">
-            <h4 className="font-extrabold text-amber-900">سياسة النشر في My School</h4>
+          <div className="bg-rose-50/50 border border-[#7d0d2b]/25 rounded-2xl p-6 space-y-2 text-xs text-slate-600">
+            <h4 className="font-extrabold text-[#800020]">سياسة النشر في My School</h4>
             <p className="leading-relaxed">
               حرصاً على مصداقية المحتوى الأكاديمي، تُمنح صلاحية نشر الأخبار والتعاميم للمعلمين المعتمدين وإدارة المدرسة فقط، بينما يتمتع الطلاب بحرية النقاش وطرح التساؤلات.
             </p>
@@ -343,15 +355,15 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
       </div>
 
-      {/* Teacher Publish News Modal */}
+      {/* Teacher Publish News Modal in Burgundy & Black */}
       {showCreateModal && isTeacher && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-amber-200 rounded-3xl max-w-lg w-full p-6 space-y-4 text-right shadow-2xl animate-fadeIn">
-            <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-[#7d0d2b]/30 rounded-3xl max-w-lg w-full p-6 space-y-4 text-right shadow-2xl animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-[#7d0d2b]/15">
               <h3 className="text-base font-extrabold text-slate-900">نشر خبر أو إعلان مادة جديد</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -366,7 +378,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   placeholder="مثال: موعد اختبار الرياضيات التجريبي للفصل الأول"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-medium"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#800020] font-medium"
                 />
               </div>
 
@@ -375,7 +387,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value as SubjectCategory)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                 >
                   <option value="الفيزياء">الفيزياء</option>
                   <option value="الكيمياء">الكيمياء</option>
@@ -395,7 +407,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   placeholder="اكتب التوجيهات، المواعيد، أو المراجع للطلاب..."
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 leading-relaxed"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-[#800020] leading-relaxed"
                 />
               </div>
 
@@ -403,13 +415,13 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 font-medium"
+                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 font-medium cursor-pointer"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-md shadow-amber-600/20"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white font-bold shadow-md shadow-[#800020]/25 cursor-pointer"
                 >
                   نشر في أخبار My School
                 </button>

@@ -94,12 +94,82 @@
         "attendanceRate": 100,
         "points": 500
       }
+    },
+    {
+      "id": "u-student-1792587279421",
+      "name": "أحمد علي",
+      "role": "student",
+      "gender": "male",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      "gradeOrSubject": "أولى ثانوي",
+      "email": "أحمد.علي@myschool.edu",
+      "schoolClass": "1/5",
+      "badges": [
+        "طالب في My School"
+      ],
+      "stats": {
+        "completedLessons": 0,
+        "gpa": 95,
+        "attendanceRate": 100,
+        "points": 500
+      }
+    },
+    {
+      "id": "u-student-1792587655525",
+      "name": "يوسف القحطاني",
+      "role": "student",
+      "gender": "male",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      "gradeOrSubject": "أولى ثانوي",
+      "email": "يوسف.القحطاني@myschool.edu",
+      "schoolClass": "1/8",
+      "badges": [
+        "طالب في My School"
+      ],
+      "stats": {
+        "completedLessons": 0,
+        "gpa": 95,
+        "attendanceRate": 100,
+        "points": 500
+      }
     }
   ],
-  "news": [],
+  "news": [
+    {
+      "id": "news-1792587285503",
+      "title": "اختبار الفيزياء النصفي",
+      "content": "تذكير لجميع الطلاب بموعد الاختبار الأسبوع القادم",
+      "category": "الفيزياء",
+      "author": "أ. محمد المنصور",
+      "authorId": "u-teacher-1",
+      "authorRole": "الفيزياء",
+      "date": "الآن",
+      "likes": 0,
+      "comments": [],
+      "tags": [
+        "الفيزياء",
+        "My_School"
+      ]
+    }
+  ],
   "videos": [],
   "tasks": [],
   "progress": [],
-  "friends": [],
+  "friends": [
+    {
+      "id": "fr-1792587292048",
+      "requesterId": "u-student-1792587279421",
+      "recipientId": "u-student-1",
+      "status": "pending",
+      "createdAt": "2026-10-21"
+    },
+    {
+      "id": "fr-1792587659217",
+      "requesterId": "u-student-1792587655525",
+      "recipientId": "u-student-2",
+      "status": "accepted",
+      "createdAt": "2026-10-21"
+    }
+  ],
   "messages": []
 }

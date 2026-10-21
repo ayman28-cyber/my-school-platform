@@ -1,19 +1,11 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import React from 'react';
 import { 
+  Sparkles, 
   TrendingUp, 
-  BookOpen, 
-  Award, 
-  Clock, 
   Play, 
-  Sparkles,
-  ChevronLeft,
-  Flame,
-  FileCheck2,
-  Users,
-  GraduationCap
+  Users
 } from 'lucide-react';
-import { User, VideoLesson, StudentProgress, StudentTask, SubjectCategory } from '../types';
+import { User, StudentTask, VideoLesson, StudentProgress, SubjectCategory } from '../types';
 import { StudentTaskManager } from './StudentTaskManager';
 
 interface StudentDashboardProps {
@@ -21,17 +13,17 @@ interface StudentDashboardProps {
   lessons: VideoLesson[];
   progressList: StudentProgress[];
   tasks: StudentTask[];
-  onAddTask: (task: {
+  onAddTask: (taskData: {
     title: string;
     subject: SubjectCategory;
     dueDate: string;
     priority: 'عاجل' | 'متوسط' | 'عادي';
     notes?: string;
-  }) => Promise<void>;
-  onToggleTask: (taskId: string) => Promise<void>;
-  onDeleteTask: (taskId: string) => Promise<void>;
+  }) => void;
+  onToggleTask: (taskId: string) => void;
+  onDeleteTask: (taskId: string) => void;
   onOpenLesson: (lessonId: string) => void;
-  onNavigateTab: (tab: 'videos' | 'news' | 'friends') => void;
+  onNavigateTab: (tab: 'dashboard' | 'videos' | 'news' | 'friends') => void;
 }
 
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({
@@ -45,33 +37,31 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   onOpenLesson,
   onNavigateTab
 }) => {
-  const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
-
   const completedLessonsCount = progressList.filter(p => p.completed).length;
   const completedTasksCount = tasks.filter(t => t.completed).length;
 
   const subjectPerformance = [
-    { name: 'الفيزياء', score: 98, color: '#d97706', hours: '6.5 ساعة', trend: '+4%' },
-    { name: 'البرمجة', score: 96, color: '#ca8a04', hours: '8.2 ساعات', trend: '+6%' },
-    { name: 'الرياضيات', score: 94, color: '#b45309', hours: '7.0 ساعات', trend: '+3%' },
-    { name: 'الكيمياء', score: 92, color: '#f59e0b', hours: '5.0 ساعات', trend: '+2%' },
-    { name: 'اللغة العربية', score: 95, color: '#eab308', hours: '4.5 ساعات', trend: '+1%' },
-    { name: 'اللغة الإنجليزية', score: 93, color: '#78350f', hours: '5.2 ساعات', trend: '+3%' },
-    { name: 'التاريخ', score: 91, color: '#92400e', hours: '3.8 ساعات', trend: '+2%' }
+    { name: 'الفيزياء', score: 98, color: '#800020', hours: '6.5 ساعة', trend: '+4%' },
+    { name: 'البرمجة', score: 96, color: '#991136', hours: '8.2 ساعات', trend: '+6%' },
+    { name: 'الرياضيات', score: 94, color: '#b81d42', hours: '7.0 ساعات', trend: '+3%' },
+    { name: 'الكيمياء', score: 92, color: '#690923', hours: '5.0 ساعات', trend: '+2%' },
+    { name: 'اللغة العربية', score: 95, color: '#4d071a', hours: '4.5 ساعات', trend: '+1%' },
+    { name: 'اللغة الإنجليزية', score: 93, color: '#330412', hours: '5.2 ساعات', trend: '+3%' },
+    { name: 'التاريخ', score: 91, color: '#8f0d30', hours: '3.8 ساعات', trend: '+2%' }
   ];
 
   return (
     <div className="space-y-8 animate-fadeIn">
       
-      {/* Welcome Banner in White & Gold Luxury */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 text-white p-6 sm:p-8 shadow-lg shadow-amber-900/10">
-        <div className="absolute -top-12 -left-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-amber-900/15 rounded-full blur-2xl pointer-events-none" />
+      {/* Welcome Banner in Burgundy & Black Luxury */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-black via-[#4a0618] to-[#7d0b28] text-white p-6 sm:p-8 shadow-xl shadow-black/20 border border-[#850e2e]/30">
+        <div className="absolute -top-12 -left-12 w-64 h-64 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-black/40 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs text-amber-100 font-bold bg-black/10 backdrop-blur-xs px-3 py-1 rounded-full w-fit">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+            <div className="flex items-center gap-2 text-xs text-rose-200 font-bold bg-black/40 backdrop-blur-xs px-3 py-1 rounded-full w-fit border border-rose-500/20">
+              <Sparkles className="w-3.5 h-3.5 text-rose-300" />
               <span>منصة My School الأكاديمية الذكية</span>
               <span aria-hidden="true">·</span>
               <span className="font-bold">{user.gradeOrSubject} · شعبة {user.schoolClass || '1/1'}</span>
@@ -80,15 +70,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
               أهلاً وسهلاً بك، {user.name} 🎓
             </h1>
-            <p className="text-xs sm:text-sm text-amber-50 leading-relaxed font-medium">
+            <p className="text-xs sm:text-sm text-rose-100/90 leading-relaxed font-medium">
               أداؤك الأكاديمي رائع ومتميز! لديك اليوم {tasks.filter(t => !t.completed).length} مهام قيد الإنجاز في جدولك الشخصي، و{completedLessonsCount} دروس مكتملة.
             </p>
 
             {/* Badges List */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-amber-100">
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-rose-100">
               <span className="font-bold text-white">الأوسمة المسجلة:</span>
               {user.badges?.map((badge, idx) => (
-                <span key={idx} className="bg-white/20 backdrop-blur-xs px-2.5 py-0.5 rounded-md font-semibold text-[11px]">
+                <span key={idx} className="bg-black/30 border border-rose-400/30 backdrop-blur-xs px-2.5 py-0.5 rounded-md font-semibold text-[11px] text-rose-200">
                   {badge}
                 </span>
               ))}
@@ -97,20 +87,20 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
           {/* Quick Metrics Cluster */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto shrink-0">
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1 font-medium">المعدل التراكمي</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1 font-medium">المعدل التراكمي</span>
               <span className="text-xl font-black text-white tabular-nums">{user.stats?.gpa || 98.4}%</span>
             </div>
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1 font-medium">نسبة الحضور</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1 font-medium">نسبة الحضور</span>
               <span className="text-xl font-black text-white tabular-nums">{user.stats?.attendanceRate || 99.2}%</span>
             </div>
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1 font-medium">المهام المنجزة</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1 font-medium">المهام المنجزة</span>
               <span className="text-xl font-black text-white tabular-nums">{completedTasksCount} / {tasks.length}</span>
             </div>
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1 font-medium">الدروس المكتملة</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1 font-medium">الدروس المكتملة</span>
               <span className="text-xl font-black text-white tabular-nums">{completedLessonsCount}</span>
             </div>
           </div>
@@ -123,7 +113,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         {/* Left Column (8 cols): Real Student Task Manager & Continue Lessons */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* Real Student Task Manager (User adds their own real tasks!) */}
+          {/* Real Student Task Manager */}
           <StudentTaskManager
             tasks={tasks}
             onAddTask={onAddTask}
@@ -132,7 +122,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           />
 
           {/* Continue Watching Educational Lessons */}
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900">متابعة شروحات المناهج</h3>
@@ -140,10 +130,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
               </div>
               <button
                 onClick={() => onNavigateTab('videos')}
-                className="text-xs text-amber-700 hover:text-amber-600 font-bold flex items-center gap-1 cursor-pointer"
+                className="text-xs text-[#800020] hover:text-[#9e1336] font-bold flex items-center gap-1 cursor-pointer"
               >
                 تصفح مكتبة الدروس
-                <ChevronLeft className="w-4 h-4" />
               </button>
             </div>
 
@@ -160,7 +149,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   return (
                     <div
                       key={lesson.id}
-                      className="group bg-stone-50 border border-stone-200 hover:border-amber-300 rounded-xl overflow-hidden transition-all flex flex-col justify-between"
+                      className="group bg-stone-50 border border-stone-200 hover:border-[#800020]/40 rounded-xl overflow-hidden transition-all flex flex-col justify-between"
                     >
                       <div className="relative aspect-video w-full overflow-hidden bg-stone-200">
                         {lesson.mediaType === 'image' ? (
@@ -171,39 +160,39 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                             referrerPolicy="no-referrer"
                           />
                         ) : (
-                          <div className="w-full h-full bg-stone-900 flex items-center justify-center text-amber-400">
+                          <div className="w-full h-full bg-black flex items-center justify-center text-rose-400">
                             <Play className="w-8 h-8" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-2.5">
-                          <span className="text-[11px] font-mono bg-black/60 backdrop-blur px-2 py-0.5 rounded text-white">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2.5">
+                          <span className="text-[11px] font-mono bg-black/70 backdrop-blur px-2 py-0.5 rounded text-white">
                             {lesson.duration}
                           </span>
                         </div>
                         <button
                           onClick={() => onOpenLesson(lesson.id)}
-                          className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
+                          className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
                         >
                           <Play className="w-4 h-4 fill-current ml-0.5" />
                         </button>
                       </div>
 
                       <div className="p-3.5 space-y-2">
-                        <div className="text-[11px] text-amber-800 font-bold">
-                          {lesson.subject} · {lesson.teacherName}
+                        <div className="text-[11px] text-[#800020] font-bold">
+                          {lesson.subject}
                         </div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-[#800020] transition-colors">
                           {lesson.title}
                         </h4>
 
                         <div className="space-y-1 pt-1">
-                          <div className="flex justify-between text-[11px] text-slate-500 tabular-nums">
-                            <span>نسبة المشاهدة</span>
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                            <span>نسبة الإتمام</span>
                             <span className="font-bold text-slate-800">{pct}%</span>
                           </div>
                           <div className="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                              className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-[#800020]'}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -222,7 +211,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <div className="lg:col-span-4 space-y-6">
           
           {/* Subject Performance Breakdown */}
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
             <div>
               <h3 className="text-base font-extrabold text-slate-900">أداء المواد الدراسية</h3>
               <p className="text-xs text-slate-500">معدل الإتقان والدرجات لكل مادة في My School</p>
@@ -249,8 +238,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
               ))}
             </div>
 
-            {/* Performance Curve SVG */}
-            <div className="pt-4 border-t border-amber-100">
+            {/* Performance Curve SVG in Burgundy */}
+            <div className="pt-4 border-t border-[#7d0d2b]/15">
               <div className="flex items-center justify-between mb-2 text-xs">
                 <span className="text-slate-500 font-medium">منحنى التطور الأسبوعي</span>
                 <span className="text-emerald-600 font-bold flex items-center gap-1">
@@ -263,13 +252,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   <path
                     d="M 0,50 Q 100,35 200,25 T 400,10"
                     fill="none"
-                    stroke="#d97706"
+                    stroke="#800020"
                     strokeWidth="2.5"
                   />
-                  <circle cx="0" cy="50" r="3.5" fill="#d97706" />
-                  <circle cx="100" cy="35" r="3.5" fill="#d97706" />
-                  <circle cx="200" cy="25" r="4" fill="#ca8a04" />
-                  <circle cx="300" cy="18" r="3.5" fill="#d97706" />
+                  <circle cx="0" cy="50" r="3.5" fill="#800020" />
+                  <circle cx="100" cy="35" r="3.5" fill="#991136" />
+                  <circle cx="200" cy="25" r="4" fill="#690923" />
+                  <circle cx="300" cy="18" r="3.5" fill="#800020" />
                   <circle cx="400" cy="10" r="4" fill="#16a34a" />
                 </svg>
               </div>
@@ -277,15 +266,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           </div>
 
           {/* Social Peers Teaser */}
-          <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50/40 border border-amber-200 rounded-2xl p-6 shadow-xs space-y-3">
+          <div className="bg-gradient-to-br from-rose-50/50 via-white to-rose-50/20 border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <Users className="w-4 h-4 text-amber-600" />
+                <Users className="w-4 h-4 text-[#800020]" />
                 شبكة زملاء الصف
               </h3>
               <button
                 onClick={() => onNavigateTab('friends')}
-                className="text-xs text-amber-700 hover:text-amber-800 font-bold"
+                className="text-xs text-[#800020] hover:text-[#9e1336] font-bold cursor-pointer"
               >
                 تصفح الزملاء
               </button>
@@ -295,7 +284,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             </p>
             <button
               onClick={() => onNavigateTab('friends')}
-              className="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-md shadow-amber-600/20 cursor-pointer"
+              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold transition-all shadow-md shadow-[#800020]/20 cursor-pointer"
             >
               إضافة صديق جديد +
             </button>

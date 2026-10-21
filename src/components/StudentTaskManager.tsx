@@ -1,28 +1,25 @@
 import React, { useState } from 'react';
 import { 
-  CheckCircle2, 
-  Circle, 
   Plus, 
   Trash2, 
+  CheckCircle2, 
+  Circle, 
   Calendar, 
-  AlertCircle, 
-  Sparkles,
-  BookOpen,
-  Filter
+  BookOpen
 } from 'lucide-react';
 import { StudentTask, SubjectCategory } from '../types';
 
 interface StudentTaskManagerProps {
   tasks: StudentTask[];
-  onAddTask: (task: {
+  onAddTask: (taskData: {
     title: string;
     subject: SubjectCategory;
     dueDate: string;
     priority: 'عاجل' | 'متوسط' | 'عادي';
     notes?: string;
-  }) => Promise<void>;
-  onToggleTask: (taskId: string) => Promise<void>;
-  onDeleteTask: (taskId: string) => Promise<void>;
+  }) => void;
+  onToggleTask: (taskId: string) => void;
+  onDeleteTask: (taskId: string) => void;
 }
 
 const SUBJECT_OPTIONS: SubjectCategory[] = [
@@ -41,13 +38,15 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
   onToggleTask,
   onDeleteTask
 }) => {
+  const [filterState, setFilterState] = useState<'all' | 'pending' | 'completed'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState<SubjectCategory>('الفيزياء');
-  const [dueDate, setDueDate] = useState('غداً 08:00 م');
-  const [priority, setPriority] = useState<'عاجل' | 'متوسط' | 'عادي'>('عاجل');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState<'عاجل' | 'متوسط' | 'عادي'>('متوسط');
   const [notes, setNotes] = useState('');
-  const [filterState, setFilterState] = useState<'all' | 'pending' | 'completed'>('all');
+
+  const completedCount = tasks.filter(t => t.completed).length;
 
   const filteredTasks = tasks.filter(t => {
     if (filterState === 'pending') return !t.completed;
@@ -55,18 +54,16 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
     return true;
   });
 
-  const completedCount = tasks.filter(t => t.completed).length;
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    await onAddTask({
+    onAddTask({
       title: title.trim(),
       subject,
-      dueDate: dueDate.trim() || 'قريباً',
+      dueDate: dueDate.trim() || 'اليوم',
       priority,
-      notes: notes.trim()
+      notes: notes.trim() || undefined
     });
 
     setTitle('');
@@ -75,15 +72,15 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
   };
 
   return (
-    <div className="bg-white border border-amber-200/80 rounded-2xl p-6 shadow-sm space-y-5">
+    <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-sm space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-amber-100">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#7d0d2b]/15">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-base font-extrabold text-slate-900">
               قائمة مهامي المدرسية الشخصية
             </h3>
-            <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold text-[#800020] bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded-full">
               {completedCount} من {tasks.length} منجز
             </span>
           </div>
@@ -97,24 +94,24 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
           <div className="flex items-center gap-1 p-1 bg-stone-100 rounded-xl text-xs font-medium">
             <button
               onClick={() => setFilterState('all')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${
-                filterState === 'all' ? 'bg-white text-amber-700 shadow-sm font-bold' : 'text-slate-600'
+              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                filterState === 'all' ? 'bg-white text-[#800020] shadow-sm font-bold' : 'text-slate-600'
               }`}
             >
               الكل
             </button>
             <button
               onClick={() => setFilterState('pending')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${
-                filterState === 'pending' ? 'bg-white text-amber-700 shadow-sm font-bold' : 'text-slate-600'
+              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                filterState === 'pending' ? 'bg-white text-[#800020] shadow-sm font-bold' : 'text-slate-600'
               }`}
             >
               قيد العمل
             </button>
             <button
               onClick={() => setFilterState('completed')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${
-                filterState === 'completed' ? 'bg-white text-amber-700 shadow-sm font-bold' : 'text-slate-600'
+              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                filterState === 'completed' ? 'bg-white text-[#800020] shadow-sm font-bold' : 'text-slate-600'
               }`}
             >
               المكتملة
@@ -123,9 +120,9 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-sm transition-all whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-sm transition-all whitespace-nowrap cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-rose-300" />
             إضافة مهمة جديدة
           </button>
         </div>
@@ -134,7 +131,7 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
       {/* Task List */}
       {filteredTasks.length === 0 ? (
         <div className="py-8 text-center text-slate-400 space-y-2">
-          <BookOpen className="w-8 h-8 text-amber-400/60 mx-auto" />
+          <BookOpen className="w-8 h-8 text-rose-300/60 mx-auto" />
           <p className="text-xs">لا توجد مهام في هذا التصنيف. أضف مهامك الجديدة لتنظيم يومك الدراسي!</p>
         </div>
       ) : (
@@ -145,30 +142,30 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
               className={`p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
                 task.completed
                   ? 'bg-stone-50 border-stone-200 opacity-75'
-                  : 'bg-white border-amber-200/90 hover:border-amber-300 shadow-xs'
+                  : 'bg-white border-stone-200 hover:border-[#800020]/40 shadow-xs'
               }`}
             >
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <button
                   onClick={() => onToggleTask(task.id)}
-                  className="mt-0.5 text-amber-600 hover:text-amber-700 transition-colors cursor-pointer shrink-0"
+                  className="mt-0.5 text-[#800020] hover:text-[#991136] transition-colors cursor-pointer shrink-0"
                   title={task.completed ? 'تحديد كغير مكتملة' : 'إتمام المهمة'}
                 >
                   {task.completed ? (
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 fill-emerald-100" />
                   ) : (
-                    <Circle className="w-5 h-5 text-stone-300 hover:text-amber-500" />
+                    <Circle className="w-5 h-5 text-stone-300 hover:text-[#800020]" />
                   )}
                 </button>
 
                 <div className="space-y-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap text-[11px]">
-                    <span className="font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                    <span className="font-bold text-[#800020] bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded">
                       {task.subject}
                     </span>
                     <span className="text-slate-400">·</span>
                     <span className="text-slate-500 font-medium flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-amber-600" />
+                      <Calendar className="w-3 h-3 text-[#800020]" />
                       {task.dueDate}
                     </span>
                     {task.priority === 'عاجل' && (
@@ -207,15 +204,15 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
       {/* Add Task Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-amber-200 rounded-3xl max-w-md w-full p-6 space-y-4 text-right shadow-2xl animate-fadeIn">
-            <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+          <div className="bg-white border border-[#7d0d2b]/25 rounded-3xl max-w-md w-full p-6 space-y-4 text-right shadow-2xl animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-[#7d0d2b]/15">
               <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <Plus className="w-4 h-4 text-amber-600" />
+                <Plus className="w-4 h-4 text-[#800020]" />
                 إضافة مهمة دراسية جديدة
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -230,7 +227,7 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                   placeholder="مثال: تلخيص درس الكيمياء العضوية وحل المسائل"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-medium"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#800020] font-medium"
                 />
               </div>
 
@@ -240,7 +237,7 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                   <select
                     value={subject}
                     onChange={(e) => setSubject(e.target.value as SubjectCategory)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                   >
                     {SUBJECT_OPTIONS.map(subj => (
                       <option key={subj} value={subj}>{subj}</option>
@@ -253,7 +250,7 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as any)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                   >
                     <option value="عاجل">عاجل</option>
                     <option value="متوسط">متوسط</option>
@@ -269,7 +266,7 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                   placeholder="مثال: غداً 08:00 م أو الأحد القادم"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                 />
               </div>
 
@@ -280,7 +277,7 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                   placeholder="أي مراجع أو تفاصيل تريد تذكرها..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#800020]"
                 />
               </div>
 
@@ -288,13 +285,13 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 font-medium"
+                  className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 font-medium cursor-pointer"
                 >
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-md shadow-amber-600/20"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white font-bold shadow-md shadow-[#800020]/20 cursor-pointer"
                 >
                   حفظ المهمة في قائمتي
                 </button>

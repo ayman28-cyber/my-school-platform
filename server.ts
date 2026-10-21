@@ -409,6 +409,10 @@ app.get('/api/friends/:userId', (req: Request, res: Response) => {
     r => r.recipientId === userId && r.status === 'pending'
   );
 
+  const pendingOutgoing = db.friends.filter(
+    r => r.requesterId === userId && r.status === 'pending'
+  );
+
   const friendUserIds = accepted.map(r => r.requesterId === userId ? r.recipientId : r.requesterId);
   const friendsList = db.users.filter(u => friendUserIds.includes(u.id));
 
@@ -418,9 +422,12 @@ app.get('/api/friends/:userId', (req: Request, res: Response) => {
     createdAt: r.createdAt
   }));
 
+  const outgoingPendingUserIds = pendingOutgoing.map(r => r.recipientId);
+
   res.json({
     friends: friendsList,
-    incomingRequests
+    incomingRequests,
+    outgoingPendingUserIds
   });
 });
 
@@ -492,37 +499,53 @@ app.post('/api/messages', async (req: Request, res: Response) => {
 
 // Vite Middleware & Static Serving
 async function startServer() {
+  const isCloudRun = Boolean(process.env.K_SERVICE || process.env.K_REVISION);
+  const isExplicitDev = (process.env.NODE_ENV === 'development' || process.env.npm_lifecycle_event === 'dev') && !isCloudRun;
   const distPath = path.join(__dirname, 'dist');
   const distIndexExists = fsSync.existsSync(path.join(distPath, 'index.html'));
-  const isProduction =
-    process.env.NODE_ENV === 'production' ||
-    process.env.npm_lifecycle_event === 'start' ||
-    (distIndexExists && process.env.NODE_ENV !== 'development' && process.env.npm_lifecycle_event !== 'dev');
 
-  if (isProduction) {
+  if (!isExplicitDev || distIndexExists) {
     console.log('📦 Serving production static bundle from:', distPath);
     app.use(express.static(distPath));
     app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      const indexPath = path.join(distPath, 'index.html');
+      if (fsSync.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(200).send(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>My School</title></head><body style="font-family:sans-serif;text-align:center;padding:50px;"><h2>منصة My School</h2><p>جارٍ تجهيز المحتوى، يرجى التحديث بعد لحظات...</p><script>setTimeout(()=>location.reload(),1500);</script></body></html>`);
+      }
+    });
+
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 My School Platform successfully listening at http://0.0.0.0:${PORT}`);
+    });
+
+    server.on('error', (err: any) => {
+      console.error('❌ Server startup error:', err);
+      process.exit(1);
     });
   } else {
     console.log('⚡ Initializing Vite development middleware...');
-    const { createServer } = await import('vite');
-    const vite = await createServer({
-      server: { middlewareMode: true },
-      appType: 'spa'
+    try {
+      const { createServer } = await import('vite');
+      const vite = await createServer({
+        server: { middlewareMode: true },
+        appType: 'spa'
+      });
+      app.use(vite.middlewares);
+    } catch (e) {
+      console.error('Error starting Vite middleware:', e);
+    }
+
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 My School Platform successfully listening at http://0.0.0.0:${PORT}`);
     });
-    app.use(vite.middlewares);
+
+    server.on('error', (err: any) => {
+      console.error('❌ Server startup error:', err);
+      process.exit(1);
+    });
   }
-
-  const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 My School Platform successfully listening at http://0.0.0.0:${PORT}`);
-  });
-
-  server.on('error', (err: any) => {
-    console.error('❌ Server startup error:', err);
-    process.exit(1);
-  });
 }
 
 startServer();

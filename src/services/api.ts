@@ -224,6 +224,7 @@ export const api = {
   async getFriendsData(userId: string): Promise<{
     friends: User[];
     incomingRequests: { relationId: string; user?: User; createdAt: string }[];
+    outgoingPendingUserIds?: string[];
   }> {
     try {
       const res = await fetch(`/api/friends/${userId}`);
@@ -231,7 +232,7 @@ export const api = {
     } catch {
       // Fallback
     }
-    return { friends: [], incomingRequests: [] };
+    return { friends: [], incomingRequests: [], outgoingPendingUserIds: [] };
   },
 
   async sendFriendRequest(requesterId: string, recipientId: string): Promise<{ success: boolean; message?: string }> {

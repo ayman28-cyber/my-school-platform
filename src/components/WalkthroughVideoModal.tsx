@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Play, 
   Pause, 
   RotateCcw, 
-  CheckCircle2, 
+  Volume2, 
+  VolumeX, 
   Sparkles, 
   X, 
-  ChevronRight, 
-  ChevronLeft, 
+  CheckCircle2, 
   BookOpen, 
   Users2, 
   Newspaper, 
   LayoutDashboard, 
   ArrowLeft,
-  Volume2,
-  VolumeX,
-  GraduationCap
+  GraduationCap,
+  Target,
+  Compass,
+  MessageSquare,
+  ShieldCheck,
+  Flame,
+  AudioWaveform,
+  Gauge
 } from 'lucide-react';
-import { WalkthroughStep } from '../types';
 
 interface WalkthroughVideoModalProps {
   isOpen: boolean;
@@ -26,81 +30,108 @@ interface WalkthroughVideoModalProps {
   onNavigateTab: (tab: 'dashboard' | 'videos' | 'news' | 'friends') => void;
 }
 
-const WALKTHROUGH_STEPS: WalkthroughStep[] = [
+// Structured guide sections with scripts for speech synthesis
+interface GuideSection {
+  id: string;
+  title: string;
+  badge: string;
+  icon: 'Target' | 'LayoutDashboard' | 'Newspaper' | 'BookOpen' | 'Users2' | 'ShieldCheck';
+  summary: string;
+  speechText: string;
+  details: string[];
+  tabTarget?: 'dashboard' | 'videos' | 'news' | 'friends';
+  tabLabel?: string;
+}
+
+const GUIDE_SECTIONS: GuideSection[] = [
   {
-    id: 1,
-    title: 'تسجيل الدخول بالاسم وتحديد الدور (طالب / معلم)',
-    subtitle: 'تجربة حقيقية بدون كلمات مرور مع ترحيب مخصص',
-    description: 'يدخل المستخدم اسمه الشخصي ويحدد ما إذا كان طالباً أو معلماً، لتهيئ المنصة واجهة مخصصة وصلاحيات ملائمة.',
-    targetView: 'dashboard',
-    videoTime: '00:00 - 01:15',
-    featureBadge: 'بوابة الدخول الذكية',
-    iconName: 'GraduationCap',
-    keyPoints: [
-      'الدخول الفوري بالاسم بدون كلمة مرور',
-      'تحديد الصف الدراسي أو التخصص التعليمي',
-      'صلاحيات موجهة لكل فئة في المدرسة'
+    id: 'goals',
+    title: 'أهداف ورؤية منصة My School التعليمية الذكية',
+    badge: 'الرؤية والأهداف الأكاديمية',
+    icon: 'Target',
+    summary: 'تم تصميم منصة My School لتكون البيئة المدرسية الرقمية المتكاملة التي تجمع المعلمين والطلاب في مساحة موحدة تحفز التميز الأكاديمي والتعاون المشترك.',
+    speechText: 'أهلاً بكم في منصة ماي سكول المدرسية المتكاملة. تهدف المنصة إلى بناء بيئة تعليمية ذكية ومترابطة، تجمع المعلمين والطلاب تحت سقف رقمي موحد. تسعى المنصة إلى تعزيز الشفافية الأكاديمية، وتنظيم المهام الدراسية للطلاب، وتوفير شروحات ومكتبة تفاعلية للمواد السبع المعتمدة، مع بناء شبكة صداقة وتواصل آمنة وموثوقة بين كافة زملاء المدرسة.',
+    details: [
+      'التحول الرقمي الكامل للمجتمع المدرسي وتسهيل الوصول للدروس والواجبات.',
+      'تمكين الطالب من قيادة مساره التعليمي وتحديد أولويات مهامه بنفسه.',
+      'حصر النشر والإعلانات الرسمية على المعلمين المعتمدين لضمان دقة المحتوى.',
+      'توفير شبكة زملاء حقيقية للتواصل الأكاديمي والمذاكرة المشتركة دون مشتتات.'
     ]
   },
   {
-    id: 2,
-    title: 'قائمة مهام الطالب الشخصية التفاعلية',
-    subtitle: 'أنت من يحدد ويضيف مهامك الدراسية وليس عشوائياً',
-    description: 'يستطيع كل طالب إضافة مهام مخصصة لكل مادة (الفيزياء، الكيمياء، البرمجة...) مع تاريخ التسليم وتحديد الأولوية وإتمامها.',
-    targetView: 'dashboard',
-    videoTime: '01:15 - 02:30',
-    featureBadge: 'إدارة المهام الحقيقية',
-    iconName: 'LayoutDashboard',
-    keyPoints: [
-      'إضافة وتعديل وحذف المهام الدراسية الحقيقية',
-      'تحديث فوري لنسبة الإنجاز والمعدل التراكمي',
-      'تصنيف حسب المواد والأولويات العاجلة'
-    ]
+    id: 'login',
+    title: '1. تسجيل الدخول السريع وتحديد الهوية المدرسية',
+    badge: 'الخطوة الأولى',
+    icon: 'ShieldCheck',
+    summary: 'دخول مباشر بالاسم الشخصي واختيار الصف والشعبة أو تخصص المعلم مع الحفظ الفوري في قاعدة البيانات.',
+    speechText: 'الخطوة الأولى: تسجيل الدخول السريع. تتيح المنصة للطلاب والمعلمين الدخول الفوري بكتابة الاسم واختيار الصف والشعبة الرسمية لطلاب أولى ثانوي من الشعبة واحد على واحد إلى واحد على اثني عشر، ولثانية بكالوريا من الشعبة اثنين على واحد إلى اثنين على تسعة، أو اختيار تخصص المعلم، ويتم حفظ كافة البيانات فورياً في قاعدة البيانات.',
+    details: [
+      'الدخول الفوري بالاسم بدون تعقيدات كلمات المرور المنسية.',
+      'توزيع الشعب المدرسية بدقة متوافقة مع الهيكل الفعلي للمدرسة.',
+      'تخصيص كامل للأذونات والصلاحيات بحسب دور المعلم أو الطالب.'
+    ],
+    tabTarget: 'dashboard',
+    tabLabel: 'عرض لوحة التحكم'
   },
   {
-    id: 3,
-    title: 'أخبار المواد وصلاحيات النشر للمعلم فقط',
-    subtitle: 'أخبار مقسمة للمواد السبع، والنشر محصور للمعلمين',
-    description: 'تم تصنيف الأخبار إلى (اللغة العربية، الإنجليزية، التاريخ، البرمجة، الكيمياء، الفيزياء، الرياضيات). النشر حصري للمعلمين والطلاب يشاركون بالتعليقات والإعجاب.',
-    targetView: 'news',
-    videoTime: '02:30 - 03:45',
-    featureBadge: 'أخبار المواد المقسمة',
-    iconName: 'Newspaper',
-    keyPoints: [
-      '7 أقسام رئيسية لكافة المواد الدراسية',
-      'حصر صلاحية النشر والإعلانات على المعلمين',
-      'مشاركة الطلاب في المناقشات والتعليقات'
-    ]
+    id: 'student-dashboard',
+    title: '2. لوحة تحكم الطالب وجدول المهام التفاعلي',
+    badge: 'تنظيم الدراسة اليومية',
+    icon: 'LayoutDashboard',
+    summary: 'أنت من يحدد ويضيف مهامك الدراسية مع تحديد الأولويات وتاريخ التسليم وتحديث المعدل التراكمي لحظياً.',
+    speechText: 'الخطوة الثانية: لوحة تحكم الطالب وإدارة المهام. في هذه اللوحة يستطيع كل طالب إضافة مهام مخصصة لمواده الدراسية، كتسليم التجارب أو حل الواجبات، مع تحديد درجة الأهمية وتاريخ التسليم، بالإضافة إلى متابعة نسبة إنجاز المناهج والمعدل التراكمي ونسب الحضور.',
+    details: [
+      'إضافة وتعديل وحذف المهام الدراسية مع وسمها كمكتملة.',
+      'تتبع ساعات المذاكرة لكل مادة ونسبة الحضور والمعدل.',
+      'أوسمة التميز والإنجاز الشخصية لتشجيع الاستمرار في التفوق.'
+    ],
+    tabTarget: 'dashboard',
+    tabLabel: 'الانتقال إلى لوحة الطالب'
   },
   {
-    id: 4,
-    title: 'مكتبة الفيديوهات التعليمية وحفظ التقدم التلقائي',
-    subtitle: 'مشاهدة شروحات المناهج وتدوين الملاحظات',
-    description: 'مشغل دروس عالي الدقة يتيح التنقل بين الفصول وتدوين الملاحظات مع حفظ التقدم تلقائياً في قاعدة بيانات My School.',
-    targetView: 'videos',
-    videoTime: '03:45 - 05:00',
-    featureBadge: 'التعلم المرئي وحفظ التقدم',
-    iconName: 'BookOpen',
-    keyPoints: [
-      'فيديوهات مصنفة حسب التخصص الأكاديمي',
-      'مفكرة رقمية لحفظ الملاحظات في الباك إند',
-      'نشر دروس جديدة من قبل المعلمين المعتمدين'
-    ]
+    id: 'subject-news',
+    title: '3. أخبار المواد السبعة وصلاحيات النشر الرسمية',
+    badge: 'التواصل الأكاديمي الموثوق',
+    icon: 'Newspaper',
+    summary: 'أخبار مقسمة للمواد السبع، والنشر محصور للمعلمين بينما يشارك الطلاب بالتعليقات والمناقشات.',
+    speechText: 'الخطوة الثالثة: أخبار المواد الدراسية. تم تصنيف الإعلانات إلى سبع مواد رئيسية، تشمل الرياضيات، الفيزياء، الكيمياء، البرمجة، الأحياء، واللغتين العربية والإنجليزية. تمنح المنصة صلاحية النشر حصرياً للمعلمين لضمان مصداقية الإعلانات، بينما يتاح للطلاب التعليق والاستفسار والتفاعل بحرية.',
+    details: [
+      'أقسام مستقلة لكل مادة دراسية لسهولة المتابعة.',
+      'حصر إنشاء المنشورات على المعلمين لمنع الإعلانات العشوائية.',
+      'إتاحة التعليقات والتفاعل والإعجاب لكافة الطلاب والأساتذة.'
+    ],
+    tabTarget: 'news',
+    tabLabel: 'تصفح أخبار المواد'
   },
   {
-    id: 5,
-    title: 'شبكة الزملاء وإضافة الأصدقاء',
-    subtitle: 'التواصل الأكاديمي الحقيقي بين طلاب My School',
-    description: 'إمكانية البحث عن زملاء الصف، إرسال طلبات صداقة، ومشاركتهم الملاحظات عبر محادثة المذاكرة المشتركة.',
-    targetView: 'friends',
-    videoTime: '05:00 - 06:15',
-    featureBadge: 'شبكة الأصدقاء والمذاكرة',
-    iconName: 'Users2',
-    keyPoints: [
-      'البحث في دليل طلاب المدرسة الحقيقيين',
-      'إرسال وقبول طلبات الصداقة المعلقة',
-      'غرفة دردشة مباشرة لحل الواجبات والاستفسارات'
-    ]
+    id: 'video-library',
+    title: '4. مكتبة الدروس وحفظ الملاحظات التلقائي',
+    badge: 'المستودع التعليمي الرقمي',
+    icon: 'BookOpen',
+    summary: 'مشاهدة شروحات المناهج وتدوين الملاحظات الدراسية مع حفظ التقدم تلقائياً في السيرفر.',
+    speechText: 'الخطوة الرابعة: مكتبة الدروس والشروحات. تضم المكتبة دروساً مرئية ومصورة لكل مادة دراسية. يستطيع الطالب متابعة الدرس وتدوين ملاحظاته الخاصة في مفكرة مدمجة تحفظ تلقائياً، كما يتيح النظام للمعلمين رفع دروس جديدة ومشاركتها مع الطلاب.',
+    details: [
+      'دروس مصنفة حسب التخصص مع شريط تقدم ونسبة إتمام.',
+      'مفكرة ذكية لتدوين الملاحظات أثناء متابعة الشرح.',
+      'إمكانية رفع المعلمين لدروس جديدة وصور توضيحية بسهولة.'
+    ],
+    tabTarget: 'videos',
+    tabLabel: 'فتح مكتبة الدروس'
+  },
+  {
+    id: 'friends-network',
+    title: '5. شبكة الزملاء وطلبات الصداقة الحقيقية',
+    badge: 'المجتمع الصفي والتعاون',
+    icon: 'Users2',
+    summary: 'البحث عن زملاء المدرسة بالاسم والشعبة، وإرسال واستقبال طلبات صداقة حقيقية، وبدء محادثات المذاكرة.',
+    speechText: 'الخطوة الخامسة: شبكة الزملاء وطلبات الصداقة. توفر المنصة دليلاً شاملاً لكافة الطلاب والمعلمين المسجلين في المدرسة. يمكنك إرسال طلب صداقة حقيقي ومتابعته، وقبول طلبات الزملاء، والتواصل الفوري عبر محادثة المذاكرة المشتركة لتبادل الاستفسارات والحلول.',
+    details: [
+      'دليل حي لطلاب المدرسة مصنف حسب البنين والبنات والشعب.',
+      'نظام طلبات صداقة حقيقي يتم حفظه في قاعدة البيانات.',
+      'محادثة نصية فورية للمذاكرة والمناقشة الصفية الثنائية.'
+    ],
+    tabTarget: 'friends',
+    tabLabel: 'استكشاف شبكة الزملاء'
   }
 ];
 
@@ -109,261 +140,468 @@ export const WalkthroughVideoModal: React.FC<WalkthroughVideoModalProps> = ({
   onClose,
   onNavigateTab
 }) => {
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
-  const [playbackProgress, setPlaybackProgress] = useState(20);
+  const [activeSectionId, setActiveSectionId] = useState<string>('goals');
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speechRate, setSpeechRate] = useState<number>(1.0);
+  const [speechSupported, setSpeechSupported] = useState(true);
+  const [activeSpeechSectionId, setActiveSpeechSectionId] = useState<string | null>(null);
+  const [synthVoiceName, setSynthVoiceName] = useState<string>('');
+  const [visualizerBars, setVisualizerBars] = useState<number[]>([40, 75, 55, 90, 60, 85, 45, 95, 70, 50, 80, 65]);
 
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  // Check speech synthesis support on mount
   useEffect(() => {
-    if (!isPlaying) return;
-    const interval = setInterval(() => {
-      setPlaybackProgress(prev => {
-        if (prev >= 100) {
-          setActiveStepIndex(cur => (cur + 1) % WALKTHROUGH_STEPS.length);
-          return 0;
-        }
-        return prev + 1.2;
-      });
-    }, 250);
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      setSpeechSupported(false);
+      return;
+    }
+
+    const updateVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const arabicVoice = voices.find(v => v.lang.startsWith('ar') || v.lang.includes('Arabic'));
+      if (arabicVoice) {
+        setSynthVoiceName(arabicVoice.name);
+      }
+    };
+
+    updateVoices();
+    window.speechSynthesis.onvoiceschanged = updateVoices;
+
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  // Equalizer animation effect when speaking
+  useEffect(() => {
+    if (!isSpeaking) {
+      setVisualizerBars([25, 30, 20, 35, 25, 30, 20, 35, 25, 30, 20, 25]);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+
+    let interval = setInterval(() => {
+      setVisualizerBars(prev => prev.map(() => Math.floor(Math.random() * 75) + 25));
+    }, 120);
+
     return () => clearInterval(interval);
-  }, [isPlaying, activeStepIndex]);
+  }, [isSpeaking]);
+
+  // Stop speech when modal is closed
+  useEffect(() => {
+    if (!isOpen && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+    }
+  }, [isOpen]);
+
+  const handleSpeakSection = (section: GuideSection) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    // If currently speaking this section, toggle pause/stop
+    if (isSpeaking && activeSpeechSectionId === section.id) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(section.speechText);
+    utteranceRef.current = utterance;
+    utterance.rate = speechRate;
+    utterance.pitch = 1.0;
+
+    // Prefer Arabic voice if found
+    const voices = window.speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang.startsWith('ar') || v.lang.includes('Arabic'));
+    if (arabicVoice) {
+      utterance.voice = arabicVoice;
+      utterance.lang = arabicVoice.lang;
+    } else {
+      utterance.lang = 'ar-SA';
+    }
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      setActiveSpeechSectionId(section.id);
+      setActiveSectionId(section.id);
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleSpeakFullGuide = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+      return;
+    }
+
+    const fullText = GUIDE_SECTIONS.map(s => `${s.title}. ${s.speechText}`).join(' ... ');
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    utteranceRef.current = utterance;
+    utterance.rate = speechRate;
+
+    const voices = window.speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang.startsWith('ar') || v.lang.includes('Arabic'));
+    if (arabicVoice) {
+      utterance.voice = arabicVoice;
+      utterance.lang = arabicVoice.lang;
+    } else {
+      utterance.lang = 'ar-SA';
+    }
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      setActiveSpeechSectionId('all');
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setActiveSpeechSectionId(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopSpeech = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsSpeaking(false);
+    setActiveSpeechSectionId(null);
+  };
+
+  const activeSection = GUIDE_SECTIONS.find(s => s.id === activeSectionId) || GUIDE_SECTIONS[0];
 
   if (!isOpen) return null;
 
-  const currentStep = WALKTHROUGH_STEPS[activeStepIndex];
-
-  const handleNext = () => {
-    setActiveStepIndex(prev => Math.min(WALKTHROUGH_STEPS.length - 1, prev + 1));
-    setPlaybackProgress(0);
-  };
-
-  const handlePrev = () => {
-    setActiveStepIndex(prev => Math.max(0, prev - 1));
-    setPlaybackProgress(0);
-  };
-
-  const handleJumpToStep = (index: number) => {
-    setActiveStepIndex(index);
-    setPlaybackProgress(0);
-  };
-
-  const handleTryFeatureNow = () => {
-    onNavigateTab(currentStep.targetView as any);
-    onClose();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white border border-amber-200 rounded-3xl max-w-5xl w-full overflow-hidden shadow-2xl flex flex-col my-auto animate-fadeIn text-right">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto" dir="rtl">
+      
+      {/* Modal Dialog with Burgundy & Black Aesthetic */}
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 15 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 15 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="w-full max-w-5xl bg-[#0c0d10] border border-[#7d0d2b]/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]"
+      >
         
-        {/* Modal Top Bar */}
-        <div className="px-6 py-4 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+        {/* Header: Burgundy & Black Gradient */}
+        <div className="bg-gradient-to-r from-black via-[#380412] to-[#6e0a23] p-5 sm:p-6 border-b border-[#850e2e]/40 flex items-center justify-between text-white relative">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-700">
-              <Sparkles className="w-4 h-4" />
+            <div className="w-12 h-12 rounded-2xl bg-black/60 border border-rose-500/30 flex items-center justify-center shadow-inner text-rose-300">
+              <Sparkles className="w-6 h-6 text-rose-400" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 leading-tight">
-                فيديو الشرح التفاعلي: دليلك الشامل لمنصة My School
-              </h2>
-              <span className="text-[11px] text-amber-800 font-medium">
-                جولة موجهة بالصوت والصورة لاستكشاف كافة إمكانيات المنصة المتطورة
-              </span>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
+                  دليل منصة My School التعليمية
+                </h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-200 hidden sm:inline">
+                  شرح نصي وصوت ذكاء اصطناعي
+                </span>
+              </div>
+              <p className="text-xs text-rose-200/90 font-medium mt-0.5">
+                تعرف على أهداف المنصة وكيفية استخدام كافة ميزاتها خطوة بخطوة بالصوت والشرح
+              </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-stone-200 hover:bg-stone-300 text-slate-700 flex items-center justify-center text-sm font-bold transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-xl bg-black/40 hover:bg-black/70 border border-rose-500/30 text-rose-200 hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer"
+            title="إغلاق"
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Body: Split Screen */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[480px]">
+        {/* AI Voice Player Control Bar */}
+        <div className="bg-[#14151a] border-b border-[#4d071a]/50 p-3.5 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           
-          {/* Video Stage (7 cols) */}
-          <div className="lg:col-span-7 bg-black flex flex-col justify-between relative overflow-hidden">
-            <div className="relative aspect-video w-full h-full min-h-[300px] flex items-center justify-center bg-slate-950">
-              <img
-                src="/src/assets/images/platform_tutorial_cover_1792491933699.jpg"
-                alt="My School Walkthrough Cover"
-                className="w-full h-full object-cover opacity-85"
-                referrerPolicy="no-referrer"
-              />
+          {/* Player status & Equalizer */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={handleSpeakFullGuide}
+              className={`px-4 py-2 rounded-xl font-extrabold flex items-center gap-2 transition-all cursor-pointer shadow-md ${
+                isSpeaking && activeSpeechSectionId === 'all'
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/30'
+                  : 'bg-gradient-to-r from-[#6e0a23] to-[#910d2e] hover:from-[#800b29] hover:to-[#a31034] text-white shadow-[#6e0a23]/30'
+              }`}
+              title="الاستماع للشرح الكامل بصوت الذكاء الاصطناعي"
+            >
+              {isSpeaking && activeSpeechSectionId === 'all' ? (
+                <>
+                  <Pause className="w-4 h-4 fill-current" />
+                  <span>إيقاف القراءة</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-current ml-0.5" />
+                  <span>استمع للشرح الكامل (AI)</span>
+                </>
+              )}
+            </button>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/60 p-6 flex flex-col justify-between">
-                
-                {/* HUD Top Tag */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-amber-200 font-bold bg-black/60 backdrop-blur-xs px-3 py-1 rounded-full border border-amber-500/40">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span>فصل 0{activeStepIndex + 1}: {currentStep.featureBadge}</span>
-                  </div>
+            {isSpeaking && (
+              <button
+                onClick={handleStopSpeech}
+                className="p-2 rounded-xl bg-black/60 hover:bg-black/90 border border-rose-500/30 text-rose-300 hover:text-white transition-colors cursor-pointer"
+                title="إيقاف نهائي"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            )}
 
-                  <span className="font-mono text-xs text-stone-200 bg-black/60 backdrop-blur px-2.5 py-1 rounded-full">
-                    {currentStep.videoTime}
-                  </span>
-                </div>
+            {/* Live Audio Visualizer Equalizer */}
+            <div className="flex items-center gap-1 h-6 px-2.5 py-1 bg-black/50 border border-rose-900/40 rounded-lg">
+              {visualizerBars.map((height, i) => (
+                <span
+                  key={i}
+                  style={{ height: `${height}%` }}
+                  className={`w-1 rounded-full transition-all duration-150 ${
+                    isSpeaking ? 'bg-gradient-to-t from-rose-700 to-rose-400' : 'bg-stone-700'
+                  }`}
+                />
+              ))}
+            </div>
 
-                {/* Center Dynamic Animation Overlay */}
-                <div className="flex flex-col items-center text-center space-y-3 px-4">
-                  <motion.div
-                    key={currentStep.id}
-                    initial={{ scale: 0.85, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-16 h-16 rounded-2xl bg-amber-600/90 backdrop-blur border border-amber-300 shadow-2xl flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform"
-                    onClick={() => setIsPlaying(!isPlaying)}
-                  >
-                    {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 fill-current ml-1" />}
-                  </motion.div>
+            <span className="text-[11px] text-stone-400 truncate max-w-[200px] hidden md:inline">
+              {isSpeaking 
+                ? (activeSpeechSectionId === 'all' ? 'جاري قراءة الدليل الكامل...' : `يقرأ: ${GUIDE_SECTIONS.find(s => s.id === activeSpeechSectionId)?.title.slice(0, 25)}...`)
+                : (synthVoiceName ? `الصوت المعتمد: ${synthVoiceName}` : 'الصوت العربي الذكي جاهز')}
+            </span>
+          </div>
 
-                  <div className="space-y-1">
-                    <h3 className="text-lg sm:text-xl font-black text-white drop-shadow-md">
-                      {currentStep.title}
-                    </h3>
-                    <p className="text-xs text-amber-200 drop-shadow font-medium">
-                      {currentStep.subtitle}
-                    </p>
-                  </div>
-                </div>
+          {/* Speed & Narration Options */}
+          <div className="flex items-center gap-2 self-end sm:self-center">
+            <span className="text-stone-400 text-[11px]">سرعة الصوت:</span>
+            {[1.0, 1.25, 1.5].map((rate) => (
+              <button
+                key={rate}
+                onClick={() => setSpeechRate(rate)}
+                className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                  speechRate === rate
+                    ? 'bg-[#700b24] text-white border border-rose-500/50'
+                    : 'bg-black/40 text-stone-400 hover:text-stone-200 border border-stone-800'
+                }`}
+              >
+                {rate}x
+              </button>
+            ))}
+          </div>
 
-                {/* Bottom Video Controls */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-stone-300">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="hover:text-white transition-colors cursor-pointer"
-                      >
-                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                      </button>
-                      <button
-                        onClick={() => setIsMuted(!isMuted)}
-                        className="hover:text-white transition-colors cursor-pointer"
-                      >
-                        {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
-                      </button>
-                      <span className="text-[11px] font-mono text-stone-400">
-                        {isPlaying ? 'جاري العرض التفاعلي...' : 'متوقف'}
-                      </span>
-                    </div>
+        </div>
 
+        {/* Body Grid: 2 Columns (Navigation / Content) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto divide-y lg:divide-y-0 lg:divide-x lg:divide-x-reverse divide-[#380512]/60">
+          
+          {/* Right Navigation Column (4 cols) */}
+          <div className="lg:col-span-4 p-4 space-y-2 bg-[#0e0f13]/80 overflow-y-auto">
+            <span className="text-[11px] font-extrabold text-stone-400 px-2 block mb-2">
+              أقسام الدليل والشرح:
+            </span>
+
+            {GUIDE_SECTIONS.map((sec, idx) => {
+              const isSelected = activeSectionId === sec.id;
+              const isReadingThis = isSpeaking && activeSpeechSectionId === sec.id;
+
+              return (
+                <div
+                  key={sec.id}
+                  onClick={() => setActiveSectionId(sec.id)}
+                  className={`p-3 rounded-2xl cursor-pointer transition-all border text-right group ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-[#29030d] to-[#450718] border-rose-600/50 text-white shadow-md'
+                      : 'bg-[#15161c]/60 hover:bg-[#1f2029] border-stone-800/80 text-stone-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-bold text-rose-300">
+                      {sec.badge}
+                    </span>
+
+                    {/* Quick Speak button for this section */}
                     <button
-                      onClick={() => setPlaybackProgress(0)}
-                      className="text-stone-300 hover:text-white text-xs flex items-center gap-1 cursor-pointer"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSpeakSection(sec);
+                      }}
+                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                        isReadingThis 
+                          ? 'bg-rose-600 text-white' 
+                          : 'bg-black/40 hover:bg-rose-950/70 text-rose-400 hover:text-rose-200 border border-rose-900/30'
+                      }`}
+                      title={isReadingThis ? 'إيقاف قراءة هذا القسم' : 'استمع لهذا القسم بالصوت'}
                     >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      إعادة
+                      {isReadingThis ? (
+                        <Pause className="w-3.5 h-3.5" />
+                      ) : (
+                        <Volume2 className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   </div>
 
-                  {/* Progress Bar in Gold */}
-                  <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-200"
-                      style={{ width: `${playbackProgress}%` }}
-                    />
-                  </div>
-                </div>
+                  <h3 className="text-xs font-black mt-1 text-white leading-tight">
+                    {sec.title}
+                  </h3>
 
-              </div>
-            </div>
+                  <p className="text-[11px] text-stone-400 mt-1 line-clamp-2 leading-relaxed">
+                    {sec.summary}
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Concept Deck (5 cols) in White & Gold */}
-          <div className="lg:col-span-5 p-6 bg-white flex flex-col justify-between space-y-6">
+          {/* Left Content Column (8 cols): Detailed Explanations */}
+          <div className="lg:col-span-8 p-6 sm:p-8 bg-[#0c0d10] space-y-6 overflow-y-auto">
             
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-amber-800 font-extrabold">
-                  الفصل {activeStepIndex + 1} من {WALKTHROUGH_STEPS.length}
-                </span>
-                <span className="text-xs text-slate-400 font-mono">
-                  {currentStep.videoTime}
-                </span>
-              </div>
+            {/* Active Section Banner */}
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1a0208] via-[#330511] to-black border border-rose-900/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="relative z-10 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300">
+                    {activeSection.badge}
+                  </span>
 
-              <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
-                {currentStep.title}
+                  <button
+                    onClick={() => handleSpeakSection(activeSection)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#700b24] hover:bg-[#850d2c] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+                  >
+                    {isSpeaking && activeSpeechSectionId === activeSection.id ? (
+                      <>
+                        <Pause className="w-3.5 h-3.5 fill-current" />
+                        <span>إيقاف الصوت</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span>استمع لصوت الذكاء الاصطناعي</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <h2 className="text-xl sm:text-2xl font-black text-white leading-snug">
+                  {activeSection.title}
+                </h2>
+
+                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-normal">
+                  {activeSection.summary}
+                </p>
+              </div>
+            </div>
+
+            {/* Key Practical Details */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-extrabold text-rose-300 uppercase tracking-wider flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-rose-400" />
+                <span>أبرز النقاط والتعليمات العملية:</span>
               </h3>
 
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                {currentStep.description}
-              </p>
-
-              <div className="space-y-2 pt-2">
-                <span className="text-xs font-bold text-slate-800 block">
-                  النقاط الأساسية في هذا المقطع:
-                </span>
-                {currentStep.keyPoints.map((point, idx) => (
-                  <div key={idx} className="flex items-start gap-2 text-xs text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <span>{point}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {activeSection.details.map((detail, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-[#14151b] border border-stone-800/90 text-xs text-stone-200 leading-relaxed flex items-start gap-2.5 shadow-2xs hover:border-rose-900/60 transition-colors"
+                  >
+                    <span className="w-5 h-5 rounded-lg bg-[#54071b] text-rose-200 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <span>{detail}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Chapters Selector */}
-            <div className="space-y-2 pt-4 border-t border-amber-100">
-              <span className="text-xs font-bold text-slate-700 block mb-1">
-                فصول الشرح:
-              </span>
-              <div className="grid grid-cols-5 gap-1.5">
-                {WALKTHROUGH_STEPS.map((step, idx) => (
-                  <button
-                    key={step.id}
-                    onClick={() => handleJumpToStep(idx)}
-                    className={`py-1.5 rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${
-                      activeStepIndex === idx
-                        ? 'bg-amber-600 text-white shadow-sm'
-                        : 'bg-stone-50 text-slate-600 hover:bg-stone-100 border border-stone-200'
-                    }`}
-                  >
-                    0{idx + 1}
-                  </button>
-                ))}
+            {/* Spoken AI Script Quote Box */}
+            <div className="p-4 rounded-2xl bg-black/60 border border-[#59071e]/40 space-y-1.5">
+              <div className="flex items-center gap-2 text-[11px] font-bold text-rose-400">
+                <AudioWaveform className="w-3.5 h-3.5" />
+                <span>نص الشرح الصوتي للذكاء الاصطناعي:</span>
               </div>
+              <p className="text-xs text-stone-300 leading-relaxed italic bg-black/30 p-3 rounded-xl border border-stone-900 font-sans">
+                "{activeSection.speechText}"
+              </p>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="space-y-3 pt-2">
-              <button
-                onClick={handleTryFeatureNow}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-700 hover:to-yellow-600 text-white text-xs font-black transition-all shadow-md shadow-amber-600/25 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>الانتقال وتجربة ميزة «{currentStep.featureBadge}» الآن</span>
-                <ArrowLeft className="w-4 h-4 ml-1" />
-              </button>
+            {/* Quick Action Navigation button */}
+            {activeSection.tabTarget && (
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-800/80">
+                <span className="text-xs text-stone-400">
+                  هل تريد تجربة هذا القسم مباشرة في المنصة؟
+                </span>
 
-              <div className="flex items-center justify-between gap-3 text-xs">
                 <button
-                  onClick={handlePrev}
-                  disabled={activeStepIndex === 0}
-                  className="flex-1 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 text-slate-700 font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  onClick={() => {
+                    if (activeSection.tabTarget) {
+                      onNavigateTab(activeSection.tabTarget);
+                      onClose();
+                    }
+                  }}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6e0a23] to-[#8f0d30] hover:from-[#800b29] hover:to-[#a31034] text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
-                  السابق
-                </button>
-                <button
-                  onClick={handleNext}
-                  disabled={activeStepIndex === WALKTHROUGH_STEPS.length - 1}
-                  className="flex-1 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 disabled:opacity-40 text-slate-700 font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  التالي
-                  <ChevronLeft className="w-4 h-4" />
+                  <span>{activeSection.tabLabel || 'الانتقال للقسم'}</span>
+                  <ArrowLeft className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            )}
 
           </div>
 
         </div>
 
-      </div>
+        {/* Footer */}
+        <div className="p-4 bg-[#0a0a0d] border-t border-stone-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white">منصة My School الأكاديمية</span>
+            <span>·</span>
+            <span>النسخة التفاعلية المطورة بتصميم العنابي والأسود الفاخر</span>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold transition-colors cursor-pointer"
+          >
+            إغلاق ومتابعة الاستخدام
+          </button>
+        </div>
+
+      </motion.div>
+
     </div>
   );
 };

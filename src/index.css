@@ -6,21 +6,21 @@
   }
 }
 
-/* Custom sleek gold-tinted scrollbar */
+/* Custom sleek burgundy-tinted scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #fbfbfa;
+  background: #fcfbfb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
+  background: #d4d0d2;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ca8a04;
+  background: #800020;
 }

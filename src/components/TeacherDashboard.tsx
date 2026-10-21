@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { 
-  Users, 
-  Video, 
+  Sparkles, 
   Plus, 
   Search, 
-  CheckCircle, 
-  Sparkles,
+  Video, 
   Send,
-  BookOpen,
-  Award
+  CheckCircle
 } from 'lucide-react';
-import { User, VideoLesson, StudentProgress, FIRST_SECONDARY_BRANCHES, SECOND_BACCALAUREATE_BRANCHES } from '../types';
+import { User, VideoLesson, StudentProgress } from '../types';
+import { UserAvatar } from './UserAvatar';
 
 interface TeacherDashboardProps {
   teacher: User;
@@ -22,11 +20,20 @@ interface TeacherDashboardProps {
   onNavigateNews: () => void;
 }
 
+const FIRST_SECONDARY_BRANCHES = [
+  '1/1', '1/2', '1/3', '1/4', '1/5', '1/6',
+  '1/7', '1/8', '1/9', '1/10', '1/11', '1/12'
+];
+
+const SECOND_BACCALAUREATE_BRANCHES = [
+  '2/1', '2/2', '2/3', '2/4', '2/5', '2/6',
+  '2/7', '2/8', '2/9'
+];
+
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   teacher,
   students,
   videos,
-  progressList,
   onOpenPublishModal,
   onOpenLesson,
   onNavigateNews
@@ -35,18 +42,15 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [feedbackSent, setFeedbackSent] = useState<string | null>(null);
 
-  const filteredStudents = students.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          s.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
     let matchesClass = true;
-    if (selectedClass !== 'all') {
-      if (selectedClass === 'grade1') {
-        matchesClass = FIRST_SECONDARY_BRANCHES.includes(s.schoolClass || '') || s.gradeOrSubject === 'أولى ثانوي';
-      } else if (selectedClass === 'grade2') {
-        matchesClass = SECOND_BACCALAUREATE_BRANCHES.includes(s.schoolClass || '') || s.gradeOrSubject === 'ثانية بكلوريا' || s.gradeOrSubject === 'ثانية بكالوريا';
-      } else {
-        matchesClass = s.schoolClass === selectedClass;
-      }
+    if (selectedClass === 'grade1') {
+      matchesClass = student.gradeOrSubject === 'أولى ثانوي';
+    } else if (selectedClass === 'grade2') {
+      matchesClass = student.gradeOrSubject === 'ثانية بكلوريا' || student.gradeOrSubject === 'ثانية بكالوريا';
+    } else if (selectedClass !== 'all') {
+      matchesClass = student.schoolClass === selectedClass;
     }
     return matchesSearch && matchesClass;
   });
@@ -61,12 +65,12 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Teacher Welcome Header in White & Gold */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 text-white p-6 sm:p-8 shadow-lg shadow-amber-900/10">
+      {/* Teacher Welcome Header in Burgundy & Black Luxury */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-black via-[#4a0618] to-[#7d0b28] text-white p-6 sm:p-8 shadow-xl shadow-black/20 border border-[#850e2e]/30">
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs text-amber-100 font-bold bg-black/10 backdrop-blur-xs px-3 py-1 rounded-full w-fit">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+            <div className="flex items-center gap-2 text-xs text-rose-200 font-bold bg-black/40 backdrop-blur-xs px-3 py-1 rounded-full w-fit border border-rose-500/20">
+              <Sparkles className="w-3.5 h-3.5 text-rose-300" />
               <span>لوحة تحكم المعلم الأكاديمية · My School</span>
               <span aria-hidden="true">·</span>
               <span>{teacher.gradeOrSubject}</span>
@@ -75,21 +79,21 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
               أهلاً بك، {teacher.name} 🎓
             </h1>
-            <p className="text-xs sm:text-sm text-amber-50 leading-relaxed font-medium">
+            <p className="text-xs sm:text-sm text-rose-100/90 leading-relaxed font-medium">
               بصفتك معلماً في My School، لديك صلاحيات حصرية لنشر الإعلانات والأخبار لكافة المواد، رفع الدروس المرئية، ومتابعة سجلات الطلاب المسجلين.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={onOpenPublishModal}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-amber-50 text-amber-800 text-xs font-bold shadow-md transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white text-xs font-bold shadow-md border border-rose-500/30 transition-all cursor-pointer"
               >
-                <Plus className="w-4 h-4 text-amber-600" />
+                <Plus className="w-4 h-4 text-rose-300" />
                 نشر درس وفيديو تعليمي جديد
               </button>
               <button
                 onClick={onNavigateNews}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black/15 hover:bg-black/25 text-white text-xs font-bold transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black/40 hover:bg-black/60 text-white border border-stone-700 text-xs font-bold transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 نشر خبر في أخبار المواد
@@ -99,20 +103,20 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
           {/* Teacher KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto shrink-0">
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1">الطلاب المسجلون</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1">الطلاب المسجلون</span>
               <span className="text-xl font-black text-white tabular-nums">{students.length} طالب</span>
             </div>
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1">الدروس المنشورة</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1">الدروس المنشورة</span>
               <span className="text-xl font-black text-white tabular-nums">{teacherVideos.length} فيديو</span>
             </div>
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1">إجمالي المشاهدات</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1">إجمالي المشاهدات</span>
               <span className="text-xl font-black text-white tabular-nums">{totalViews}</span>
             </div>
-            <div className="bg-white/15 backdrop-blur-md border border-white/20 p-3.5 rounded-2xl text-center">
-              <span className="text-[11px] text-amber-100 block mb-1">متوسط الأداء العام</span>
+            <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl text-center">
+              <span className="text-[11px] text-rose-200 block mb-1">متوسط الأداء العام</span>
               <span className="text-xl font-black text-white tabular-nums">97.2%</span>
             </div>
           </div>
@@ -131,7 +135,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         
         {/* Left Column (8 cols): Real Registered Students Roster */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-6 shadow-xs">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900">سجل متابعة الطلاب المسجلين الحقيقي</h3>
@@ -147,13 +151,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="ابحث بالاسم..."
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl pr-8 pl-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl pr-8 pl-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#800020]"
                   />
                 </div>
                 <select
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className="bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-amber-500 font-medium"
+                  className="bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#800020] font-medium"
                 >
                   <option value="all">كل الشعب والصفوف</option>
                   <optgroup label="أولى ثانوي (12 شعبة)">
@@ -172,11 +176,11 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               </div>
             </div>
 
-            {/* Students Table */}
+            {/* Students Table with Letter Avatars */}
             <div className="overflow-x-auto">
               <table className="w-full text-right text-xs">
                 <thead>
-                  <tr className="border-b border-amber-100 text-slate-400 font-bold">
+                  <tr className="border-b border-[#7d0d2b]/15 text-slate-400 font-bold">
                     <th className="pb-3 pr-2">الطالب</th>
                     <th className="pb-3 px-3">الشعبة</th>
                     <th className="pb-3 px-3">المعدل</th>
@@ -186,14 +190,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-amber-50/40 transition-colors">
+                    <tr key={student.id} className="hover:bg-rose-50/30 transition-colors">
                       <td className="py-3.5 pr-2">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={student.avatar}
-                            alt={student.name}
-                            className="w-8 h-8 rounded-full object-cover ring-1 ring-amber-200"
-                            referrerPolicy="no-referrer"
+                          <UserAvatar
+                            name={student.name}
+                            role="student"
+                            size="sm"
                           />
                           <div>
                             <div className="font-bold text-slate-900">{student.name}</div>
@@ -202,7 +205,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                         </div>
                       </td>
                       <td className="py-3.5 px-3 text-slate-600 font-medium">{student.schoolClass}</td>
-                      <td className="py-3.5 px-3 font-extrabold text-amber-800 tabular-nums">
+                      <td className="py-3.5 px-3 font-extrabold text-[#800020] tabular-nums">
                         {student.stats?.gpa}%
                       </td>
                       <td className="py-3.5 px-3 font-bold text-emerald-600 tabular-nums">
@@ -211,7 +214,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                       <td className="py-3.5 pl-2 text-left">
                         <button
                           onClick={() => handleSendFeedback(student.name)}
-                          className="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 font-bold transition-colors inline-flex items-center gap-1 text-[11px] cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-[#800020] text-[#800020] hover:text-white border border-[#800020]/25 font-bold transition-colors inline-flex items-center gap-1 text-[11px] cursor-pointer"
                         >
                           <Send className="w-3 h-3" />
                           توجيه ملاحظة
@@ -227,15 +230,15 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
         {/* Right Column (4 cols): Teacher Videos & Publishing */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white border border-amber-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <Video className="w-4 h-4 text-amber-600" />
+                <Video className="w-4 h-4 text-[#800020]" />
                 دروسك التعليمية
               </h3>
               <button
                 onClick={onOpenPublishModal}
-                className="text-xs text-amber-700 hover:text-amber-600 font-bold cursor-pointer"
+                className="text-xs text-[#800020] hover:text-[#9e1336] font-bold cursor-pointer"
               >
                 + إضافة
               </button>
@@ -251,7 +254,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   <div
                     key={video.id}
                     onClick={() => onOpenLesson(video.id)}
-                    className="cursor-pointer group p-3 rounded-xl bg-stone-50 border border-stone-200 hover:border-amber-400 transition-all flex items-center gap-3"
+                    className="cursor-pointer group p-3 rounded-xl bg-stone-50 border border-stone-200 hover:border-[#800020]/40 transition-all flex items-center gap-3"
                   >
                     <div className="w-16 h-12 rounded-lg overflow-hidden bg-stone-200 shrink-0 relative flex items-center justify-center">
                       {video.mediaType === 'image' ? (
@@ -262,13 +265,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="w-full h-full bg-stone-900 flex items-center justify-center text-amber-400">
+                        <div className="w-full h-full bg-black flex items-center justify-center text-rose-400">
                           <Video className="w-5 h-5" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-slate-900 truncate group-hover:text-amber-700">
+                      <h4 className="text-xs font-bold text-slate-900 truncate group-hover:text-[#800020]">
                         {video.title}
                       </h4>
                       <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
@@ -284,7 +287,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
             <button
               onClick={onOpenPublishModal}
-              className="w-full py-2.5 rounded-xl border border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/50 text-amber-800 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 rounded-xl border border-dashed border-[#800020]/40 hover:border-[#800020] bg-rose-50/30 text-[#800020] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               نشر درس مرئي جديد الآن

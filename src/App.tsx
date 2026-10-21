@@ -29,11 +29,24 @@ export default function App() {
   const [progressList, setProgressList] = useState<StudentProgress[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<{ relationId: string; user?: User; createdAt: string }[]>([]);
+  const [outgoingRequestIds, setOutgoingRequestIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
   // Modals & sub-views
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [showTutorialModal, setShowTutorialModal] = useState(false);
+
+  const broadcastSync = (type: string) => {
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel('myschool_sync_channel');
+        bc.postMessage({ type, timestamp: Date.now() });
+        bc.close();
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   // 1. Initial Load: Check localStorage and fetch database
   useEffect(() => {
@@ -85,6 +98,7 @@ export default function App() {
       const friendsData = await api.getFriendsData(currentUser.id);
       setFriends(friendsData.friends);
       setIncomingRequests(friendsData.incomingRequests);
+      setOutgoingRequestIds(friendsData.outgoingPendingUserIds || []);
 
       // Load message thread
       const msgs = await api.getMessages(currentUser.id, 'u-student-2');
@@ -94,14 +108,61 @@ export default function App() {
     loadUserData();
   }, [currentUser]);
 
+  // 3. Continuous Multi-User Real-Time Sync & Inter-Tab Broadcast
+  useEffect(() => {
+    let isMounted = true;
+    const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('myschool_sync_channel') : null;
+
+    const pullLiveUpdates = async () => {
+      if (!isMounted) return;
+      try {
+        const [freshUsers, freshNews, freshVideos] = await Promise.all([
+          api.getUsers(),
+          api.getNews(),
+          api.getVideos()
+        ]);
+        if (!isMounted) return;
+        setAllUsers(freshUsers);
+        setNewsList(freshNews);
+        setVideos(freshVideos);
+
+        if (currentUser) {
+          const freshFriends = await api.getFriendsData(currentUser.id);
+          if (!isMounted) return;
+          setFriends(freshFriends.friends);
+          setIncomingRequests(freshFriends.incomingRequests);
+          setOutgoingRequestIds(freshFriends.outgoingPendingUserIds || []);
+        }
+      } catch {
+        // network silent
+      }
+    };
+
+    if (channel) {
+      channel.onmessage = () => {
+        pullLiveUpdates();
+      };
+    }
+
+    const timer = setInterval(pullLiveUpdates, 3500);
+    window.addEventListener('focus', pullLiveUpdates);
+
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+      window.removeEventListener('focus', pullLiveUpdates);
+      if (channel) channel.close();
+    };
+  }, [currentUser]);
+
   // Auth: Real Login by Name & Role & Gender (no password required)
   const handleLogin = async (name: string, role: UserRole, gender: 'male' | 'female', gradeOrSubject?: string, schoolClass?: string) => {
     const user = await api.login(name, role, gender, gradeOrSubject, schoolClass);
     if (user) {
       setCurrentUser(user);
-      // Immediately refresh users list so newly logged in student is visible to all
       const updatedUsers = await api.getUsers();
       setAllUsers(updatedUsers);
+      broadcastSync('USER_LOGIN');
     }
   };
 
@@ -190,6 +251,7 @@ export default function App() {
     const res = await api.publishVideo(videoData);
     if (res.success && res.data) {
       setVideos(prev => [res.data!, ...prev]);
+      broadcastSync('VIDEO_PUBLISHED');
       return { success: true };
     }
     return { success: false, error: res.error };
@@ -200,6 +262,7 @@ export default function App() {
     const res = await api.likeNews(newsId);
     if (res.success) {
       setNewsList(prev => prev.map(n => n.id === newsId ? { ...n, likes: res.likes } : n));
+      broadcastSync('NEWS_LIKED');
     }
   };
 
@@ -212,6 +275,7 @@ export default function App() {
     });
     if (comment) {
       setNewsList(prev => prev.map(n => n.id === newsId ? { ...n, comments: [...n.comments, comment] } : n));
+      broadcastSync('NEWS_COMMENTED');
     }
   };
 
@@ -219,6 +283,7 @@ export default function App() {
     const res = await api.createNews(postData);
     if (res.success && res.data) {
       setNewsList(prev => [res.data!, ...prev]);
+      broadcastSync('POST_PUBLISHED');
       return { success: true };
     }
     return { success: false, error: res.error };
@@ -227,7 +292,13 @@ export default function App() {
   // Friends Actions
   const handleSendFriendRequest = async (recipientId: string) => {
     if (!currentUser) return;
+    setOutgoingRequestIds(prev => Array.from(new Set([...prev, recipientId])));
     await api.sendFriendRequest(currentUser.id, recipientId);
+    const data = await api.getFriendsData(currentUser.id);
+    setFriends(data.friends);
+    setIncomingRequests(data.incomingRequests);
+    setOutgoingRequestIds(data.outgoingPendingUserIds || []);
+    broadcastSync('FRIEND_REQUEST');
   };
 
   const handleRespondFriendRequest = async (relationId: string, accept: boolean) => {
@@ -237,6 +308,8 @@ export default function App() {
       const data = await api.getFriendsData(currentUser.id);
       setFriends(data.friends);
       setIncomingRequests(data.incomingRequests);
+      setOutgoingRequestIds(data.outgoingPendingUserIds || []);
+      broadcastSync('FRIEND_RESPONDED');
     }
   };
 
@@ -245,6 +318,7 @@ export default function App() {
     const msg = await api.sendMessage(currentUser.id, toId, text);
     if (msg) {
       setMessages(prev => [...prev, msg]);
+      broadcastSync('CHAT_MESSAGE');
     }
   };
 
@@ -286,7 +360,7 @@ export default function App() {
   const isTeacher = currentUser.role === 'teacher';
 
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-900 flex flex-col font-sans selection:bg-amber-500 selection:text-white" dir="rtl">
+    <div className="min-h-screen bg-stone-50 text-slate-900 flex flex-col font-sans selection:bg-[#800020] selection:text-white" dir="rtl">
       
       {/* 3-Zone Navigation Header */}
       <Navbar
@@ -295,6 +369,7 @@ export default function App() {
         currentUser={currentUser}
         onLogout={handleLogout}
         onOpenTutorial={() => setShowTutorialModal(true)}
+        incomingRequestsCount={incomingRequests.length}
       />
 
       {/* Main Container */}
@@ -355,6 +430,7 @@ export default function App() {
             allUsers={allUsers}
             friends={friends}
             incomingRequests={incomingRequests}
+            outgoingPendingUserIds={outgoingRequestIds}
             messages={messages}
             onSendFriendRequest={handleSendFriendRequest}
             onRespondRequest={handleRespondFriendRequest}
@@ -365,8 +441,8 @@ export default function App() {
 
       </main>
 
-      {/* Footer in White & Gold */}
-      <footer className="border-t border-amber-200/80 bg-white text-xs text-slate-500 py-6 mt-12">
+      {/* Footer in Burgundy & Black Theme */}
+      <footer className="border-t border-[#7d0d2b]/20 bg-white text-xs text-slate-500 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-slate-800">My School · المنصة المدرسية المتكاملة</span>
@@ -377,9 +453,9 @@ export default function App() {
           <div className="flex items-center gap-4 font-semibold">
             <button
               onClick={() => setShowTutorialModal(true)}
-              className="text-amber-700 hover:text-amber-800 transition-colors cursor-pointer"
+              className="text-[#800020] hover:text-[#9e1336] transition-colors cursor-pointer"
             >
-              دليل استخدام المنصة
+              دليل أهداف المنصة والشرح الصوتي (AI)
             </button>
           </div>
         </div>
