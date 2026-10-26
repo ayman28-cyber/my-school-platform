@@ -2,6 +2,7 @@
   "users": [
     {
       "id": "u-teacher-1",
+      "userCode": "MS-1001",
       "name": "أ. محمد المنصور",
       "role": "teacher",
       "gender": "male",
@@ -21,6 +22,7 @@
     },
     {
       "id": "u-teacher-2",
+      "userCode": "MS-1002",
       "name": "أ. مريم الدوسري",
       "role": "teacher",
       "gender": "female",
@@ -40,6 +42,7 @@
     },
     {
       "id": "u-student-1",
+      "userCode": "MS-2001",
       "name": "عبدالرحمن الشهري",
       "role": "student",
       "gender": "male",
@@ -59,6 +62,7 @@
     },
     {
       "id": "u-student-2",
+      "userCode": "MS-2002",
       "name": "سارة الزهراني",
       "role": "student",
       "gender": "female",
@@ -78,6 +82,7 @@
     },
     {
       "id": "u-student-1792498430402",
+      "userCode": "MS-2003",
       "name": "فهد العتيبي",
       "role": "student",
       "gender": "male",
@@ -97,6 +102,7 @@
     },
     {
       "id": "u-student-1792587279421",
+      "userCode": "MS-2004",
       "name": "أحمد علي",
       "role": "student",
       "gender": "male",
@@ -116,6 +122,7 @@
     },
     {
       "id": "u-student-1792587655525",
+      "userCode": "MS-2005",
       "name": "يوسف القحطاني",
       "role": "student",
       "gender": "male",
@@ -153,7 +160,19 @@
     }
   ],
   "videos": [],
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "task-1793049202264",
+      "studentId": "u-student-1",
+      "title": "مراجعة قوانين نيوتن",
+      "subject": "الفيزياء",
+      "dueDate": "غداً",
+      "priority": "عاجل",
+      "completed": false,
+      "notes": "حل المسائل 1 إلى 5",
+      "createdAt": "2026-10-26"
+    }
+  ],
   "progress": [],
   "friends": [
     {

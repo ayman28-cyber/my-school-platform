@@ -13,7 +13,10 @@ import {
   RefreshCw,
   Sparkles,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Copy,
+  Clock,
+  UserMinus
 } from 'lucide-react';
 import { User, ChatMessage, FIRST_SECONDARY_BRANCHES, SECOND_BACCALAUREATE_BRANCHES } from '../types';
 import { UserAvatar } from './UserAvatar';
@@ -23,10 +26,12 @@ interface FriendsSectionProps {
   allUsers: User[];
   friends: User[];
   incomingRequests: { relationId: string; user?: User; createdAt: string }[];
+  outgoingRequests?: { relationId: string; user?: User; createdAt: string }[];
   outgoingPendingUserIds?: string[];
   messages: ChatMessage[];
   onSendFriendRequest: (recipientId: string) => Promise<void>;
   onRespondRequest: (relationId: string, accept: boolean) => Promise<void>;
+  onCancelRequest?: (relationId: string) => Promise<void>;
   onSendMessage: (toId: string, text: string) => Promise<void>;
   onRefreshUsers?: () => Promise<void>;
 }
@@ -36,15 +41,17 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
   allUsers,
   friends,
   incomingRequests,
+  outgoingRequests = [],
   outgoingPendingUserIds = [],
   messages,
   onSendFriendRequest,
   onRespondRequest,
+  onCancelRequest,
   onSendMessage,
   onRefreshUsers
 }) => {
-  // Tabs: 'boys' (بنين) | 'girls' (بنات) | 'teachers' (معلمين)
-  const [activeDirectoryTab, setActiveDirectoryTab] = useState<'boys' | 'girls' | 'teachers'>('boys');
+  // Tabs: 'boys' (بنين) | 'girls' (بنات) | 'teachers' (معلمين) | 'requests' (طلبات الصداقة)
+  const [activeDirectoryTab, setActiveDirectoryTab] = useState<'boys' | 'girls' | 'teachers' | 'requests'>('boys');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGradeFilter, setSelectedGradeFilter] = useState<'all' | 'first_secondary' | 'second_baccalaureate'>('all');
   const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>('all');
@@ -67,6 +74,10 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
   const categorizedUsers = allUsers.filter(u => {
     if (u.id === currentUser.id) return false;
 
+    if (activeDirectoryTab === 'requests') {
+      return false;
+    }
+
     if (activeDirectoryTab === 'teachers') {
       return u.role === 'teacher';
     }
@@ -82,12 +93,14 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
     return true;
   });
 
-  // Apply search, grade, and specific branch filters
+  // Apply search (supports name, schoolClass, gradeOrSubject, and unified userCode), grade, and branch filters
   const filteredUsers = categorizedUsers.filter(u => {
-    const matchesSearch = 
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (u.schoolClass && u.schoolClass.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (u.gradeOrSubject && u.gradeOrSubject.toLowerCase().includes(searchTerm.toLowerCase()));
+    const cleanSearch = searchTerm.toLowerCase().trim();
+    const matchesSearch = !cleanSearch ||
+      u.name.toLowerCase().includes(cleanSearch) ||
+      (u.userCode && u.userCode.toLowerCase().includes(cleanSearch)) ||
+      (u.schoolClass && u.schoolClass.toLowerCase().includes(cleanSearch)) ||
+      (u.gradeOrSubject && u.gradeOrSubject.toLowerCase().includes(cleanSearch));
     
     let matchesGrade = true;
     if (selectedGradeFilter === 'first_secondary') {
@@ -124,6 +137,13 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
     setTimeout(() => setRequestSentFeedback(null), 3500);
   };
 
+  const handleCancelOutgoing = async (relationId: string, recipientName?: string) => {
+    if (!onCancelRequest) return;
+    await onCancelRequest(relationId);
+    setRequestSentFeedback(`تم إلغاء طلب الصداقة ${recipientName ? `الموجه إلى ${recipientName}` : ''}`);
+    setTimeout(() => setRequestSentFeedback(null), 3000);
+  };
+
   const handleSendChat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeChatUser || !msgInput.trim()) return;
@@ -158,7 +178,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
                 </span>
               </div>
               <span className="text-xs text-[#800020] dark:text-rose-400 font-bold">
-                {allUsers.length} مستخدم مسجل في المدرسة · مقسمين حسب البنين والبنات والمعلمين
+                {allUsers.length} مسجل في المدرسة · ابحث بالاسم أو بالكود الأكاديمي الموحد
               </span>
             </div>
           </div>
@@ -166,13 +186,13 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
 
         {/* Search & Refresh Actions */}
         <div className="flex items-center gap-2.5">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-80">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-2.5" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="ابحث بالاسم أو الشعبة..."
+              placeholder="ابحث بالاسم أو الشعبة أو الكود (MS-2001)..."
               className="w-full bg-white dark:bg-[#14151b] border border-stone-300 dark:border-stone-700 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#800020] font-medium"
             />
           </div>
@@ -189,8 +209,8 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
         </div>
       </div>
 
-      {/* User's Own Visibility Confirmation Card with Letter Avatar */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50/70 via-white to-rose-50/30 dark:from-[#1b0810] dark:via-[#14151b] dark:to-[#1b0810] border border-[#7d0d2b]/25 dark:border-rose-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors">
+      {/* User's Own Visibility Confirmation Card with Letter Avatar & Unified Code */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-50/80 via-white to-rose-50/40 dark:from-[#1b0810] dark:via-[#14151b] dark:to-[#1b0810] border border-[#7d0d2b]/25 dark:border-rose-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors">
         <div className="flex items-center gap-3">
           <UserAvatar
             name={currentUser.name}
@@ -215,8 +235,21 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
           </div>
         </div>
 
-        <div className="text-[11px] text-slate-500 dark:text-stone-400 bg-white/80 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 px-3 py-1 rounded-xl self-start sm:self-center font-mono">
-          معرّف حسابك: {currentUser.id.slice(0, 10)}...
+        {/* User's Own Unified Academic Code Display */}
+        <div className="flex items-center gap-2 bg-white dark:bg-[#1a1b24] border border-[#800020]/25 dark:border-rose-900/50 px-3 py-1.5 rounded-xl self-start sm:self-center">
+          <span className="text-[11px] text-slate-500 dark:text-stone-400 font-bold">كودك الأكاديمي الموحد:</span>
+          <span className="font-mono text-xs font-black text-[#800020] dark:text-rose-300">{currentUser.userCode}</span>
+          <button
+            onClick={() => {
+              navigator.clipboard?.writeText(currentUser.userCode);
+              setRequestSentFeedback(`تم نسخ كودك الأكاديمي الموحد (${currentUser.userCode})`);
+              setTimeout(() => setRequestSentFeedback(null), 2500);
+            }}
+            className="p-1 rounded text-slate-400 hover:text-[#800020] dark:hover:text-rose-300 transition-colors cursor-pointer"
+            title="نسخ كودك لمشاركته مع زملائك"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -227,9 +260,9 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
         </div>
       )}
 
-      {/* 3 Main Directory Category Tabs in Burgundy & Black: بنين / بنات / معلمين */}
+      {/* 4 Main Directory Category Tabs in Burgundy & Black: بنين / بنات / معلمين / طلبات الصداقة */}
       <div className="space-y-3">
-        <div className="grid grid-cols-3 gap-2 p-1.5 bg-stone-100 dark:bg-[#181922] rounded-2xl border border-stone-200 dark:border-stone-800 text-xs font-bold">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-stone-100 dark:bg-[#181922] rounded-2xl border border-stone-200 dark:border-stone-800 text-xs font-bold">
           <button
             onClick={() => {
               setActiveDirectoryTab('boys');
@@ -242,7 +275,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
             }`}
           >
             <GraduationCap className="w-4 h-4" />
-            <span>قسم البنين (الطلاب)</span>
+            <span>قسم البنين</span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
               activeDirectoryTab === 'boys' ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-800 text-slate-700 dark:text-stone-300'
             }`}>
@@ -262,7 +295,7 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
             }`}
           >
             <BookOpen className="w-4 h-4" />
-            <span>قسم البنات (الطالبات)</span>
+            <span>قسم البنات</span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
               activeDirectoryTab === 'girls' ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-800 text-slate-700 dark:text-stone-300'
             }`}>
@@ -282,12 +315,32 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>هيئة التدريس (المعلمون)</span>
+            <span>المعلمون</span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
               activeDirectoryTab === 'teachers' ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-800 text-slate-700 dark:text-stone-300'
             }`}>
               {teachersCount}
             </span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveDirectoryTab('requests');
+              setSelectedBranchFilter('all');
+            }}
+            className={`py-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer relative ${
+              activeDirectoryTab === 'requests'
+                ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/25'
+                : 'text-slate-600 dark:text-stone-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-[#20212d]'
+            }`}
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>طلبات الصداقة</span>
+            {incomingRequests.length > 0 && (
+              <span className="bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse shadow-xs font-mono">
+                {incomingRequests.length}
+              </span>
+            )}
           </button>
         </div>
 
@@ -521,101 +574,262 @@ export const FriendsSection: React.FC<FriendsSectionProps> = ({
             )}
           </div>
 
-          {/* Directory Users List with Letter Avatars */}
-          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-5 space-y-3 shadow-xs transition-colors">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                {activeDirectoryTab === 'boys' && 'سجل الطلاب (قسم البنين)'}
-                {activeDirectoryTab === 'girls' && 'سجل الطالبات (قسم البنات)'}
-                {activeDirectoryTab === 'teachers' && 'سجل هيئة التدريس (المعلمين)'}
-              </h3>
-              <span className="text-xs font-bold text-[#800020] dark:text-rose-300 bg-rose-50 dark:bg-[#20040c] px-2 py-0.5 rounded-full border border-[#800020]/20 dark:border-rose-500/30">
-                {filteredUsers.length} متاح
-              </span>
-            </div>
-
-            {filteredUsers.length === 0 ? (
-              <div className="p-6 text-center text-slate-400 dark:text-stone-500 bg-stone-50 dark:bg-[#1a1b24] rounded-xl space-y-2">
-                <Users2 className="w-8 h-8 text-stone-300 dark:text-stone-600 mx-auto" />
-                <p className="text-xs font-medium">
-                  {selectedBranchFilter !== 'all' 
-                    ? `لا يوجد طلاب مسجلون حالياً في شعبة ${selectedBranchFilter}. بمجرد تسجيل أي طالب دخوله واختيار هذه الشعبة سيظهر هنا فوراً!`
-                    : 'لا يوجد مستخدمون مطابقون لبحثك في هذا القسم حالياً.'}
-                </p>
-                {selectedBranchFilter !== 'all' && (
-                  <button
-                    onClick={() => setSelectedBranchFilter('all')}
-                    className="text-xs text-[#800020] dark:text-rose-400 font-bold hover:underline cursor-pointer"
-                  >
-                    عرض جميع الشعب
-                  </button>
-                )}
+          {/* Directory Users List OR Dedicated Friend Requests Manager */}
+          {activeDirectoryTab === 'requests' ? (
+            <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-5 space-y-5 shadow-xs transition-colors">
+              <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-[#800020] dark:text-rose-400" />
+                  قائمة إدارة طلبات الصداقة
+                </h3>
+                <span className="text-xs font-bold text-[#800020] dark:text-rose-300 bg-rose-50 dark:bg-[#20040c] px-2.5 py-0.5 rounded-full border border-[#800020]/20">
+                  {incomingRequests.length} واردة · {outgoingRequests.length} معلقة
+                </span>
               </div>
-            ) : (
-              <div className="space-y-2.5 max-h-[460px] overflow-y-auto">
-                {filteredUsers.map((user) => {
-                  const isFriend = friendIds.includes(user.id);
 
-                  return (
-                    <div
-                      key={user.id}
-                      className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b25] border border-stone-200 dark:border-stone-800 hover:border-[#800020]/40 dark:hover:border-rose-500/40 transition-colors flex items-center justify-between text-xs"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <UserAvatar
-                          name={user.name}
-                          role={user.role}
-                          size="md"
-                          showStatus
-                          statusOnline
-                        />
-                        <div className="min-w-0">
-                          <div className="font-bold text-slate-900 dark:text-white truncate text-xs">{user.name}</div>
-                          
-                          <div className="text-[11px] text-[#800020] dark:text-rose-400 font-medium truncate flex items-center gap-1.5 mt-0.5">
-                            <span>{user.gradeOrSubject}</span>
-                            {user.schoolClass && (
-                              <>
-                                <span>·</span>
-                                <span className="font-mono bg-rose-100 dark:bg-rose-950 text-[#800020] dark:text-rose-300 px-1.5 py-0.5 rounded text-[10px] font-bold">
-                                  {user.role === 'student' ? `شعبة ${user.schoolClass}` : user.schoolClass}
-                                </span>
-                              </>
-                            )}
+              {/* 1. Incoming Friend Requests */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-slate-800 dark:text-stone-200 flex items-center gap-1.5">
+                    <span>طلبات الصداقة الواردة إليك</span>
+                    <span className="text-[10px] bg-rose-100 dark:bg-rose-950 text-[#800020] dark:text-rose-300 px-1.5 py-0.2 rounded font-mono font-bold">
+                      {incomingRequests.length}
+                    </span>
+                  </span>
+                </div>
+
+                {incomingRequests.length === 0 ? (
+                  <div className="p-5 text-center text-slate-400 dark:text-stone-500 bg-stone-50 dark:bg-[#181922] rounded-xl text-xs">
+                    لا توجد طلبات صداقة واردة في الوقت الحالي. عندما يرسل لك زميل طلباً سيظهر هنا فوراً.
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto">
+                    {incomingRequests.map((req) => (
+                      <div
+                        key={req.relationId}
+                        className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b25] border border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <UserAvatar
+                            name={req.user?.name || 'مستخدم'}
+                            role={req.user?.role}
+                            size="md"
+                            showStatus
+                            statusOnline
+                          />
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-900 dark:text-white truncate block">
+                              {req.user?.name}
+                            </span>
+                            <div className="flex items-center gap-1.5 mt-0.5 font-mono text-[10px] text-[#800020] dark:text-rose-400 font-bold">
+                              <span className="bg-rose-100 dark:bg-rose-950 px-1.5 py-0.2 rounded">كود: {req.user?.userCode}</span>
+                              <span>·</span>
+                              <span>{req.user?.schoolClass ? `شعبة ${req.user.schoolClass}` : req.user?.gradeOrSubject}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="shrink-0 flex items-center gap-1.5">
-                        {isFriend ? (
+                        <div className="flex items-center gap-1.5 shrink-0">
                           <button
-                            onClick={() => setActiveChatUser(user)}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
+                            onClick={() => onRespondRequest(req.relationId, true)}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
                           >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                            <span>مراسلة</span>
+                            <Check className="w-3.5 h-3.5" />
+                            <span>قبول</span>
                           </button>
-                        ) : (outgoingPendingUserIds.includes(user.id) || localPendingIds.includes(user.id)) ? (
-                          <div className="px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-[#20040c] text-[#800020] dark:text-rose-300 border border-[#800020]/30 dark:border-rose-500/30 text-[11px] font-bold flex items-center gap-1 select-none shadow-2xs">
-                            <Sparkles className="w-3 h-3 text-[#800020] dark:text-rose-400 animate-pulse" />
-                            <span>طلب معلق ⏳</span>
-                          </div>
-                        ) : (
                           <button
-                            onClick={() => handleSendRequest(user.id, user.name)}
-                            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#222432] hover:bg-gradient-to-r hover:from-[#5e091e] hover:to-[#800020] text-[#800020] dark:text-rose-300 hover:text-white border border-[#800020]/30 dark:border-rose-500/30 font-bold transition-all text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs active:scale-95"
+                            onClick={() => onRespondRequest(req.relationId, false)}
+                            className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-rose-100 dark:hover:bg-rose-950 hover:text-rose-600 text-slate-600 dark:text-stone-300 font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
                           >
-                            <UserPlus className="w-3 h-3" />
-                            <span>إضافة صديق</span>
+                            <X className="w-3.5 h-3.5" />
+                            <span>رفض</span>
                           </button>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+
+              {/* 2. Outgoing Pending Requests */}
+              <div className="space-y-3 pt-3 border-t border-stone-200 dark:border-stone-800">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-slate-800 dark:text-stone-200 flex items-center gap-1.5">
+                    <span>الطلبات التي أرسلتها (بانتظار موافقة الزميل)</span>
+                    <span className="text-[10px] bg-stone-200 dark:bg-stone-800 text-slate-700 dark:text-stone-300 px-1.5 py-0.2 rounded font-mono font-bold">
+                      {outgoingRequests.length}
+                    </span>
+                  </span>
+                </div>
+
+                {outgoingRequests.length === 0 ? (
+                  <div className="p-5 text-center text-slate-400 dark:text-stone-500 bg-stone-50 dark:bg-[#181922] rounded-xl text-xs">
+                    لم ترسل أي طلبات صداقة معلقة. يمكنك إرسال طلبات من أقسام البنين والبنات والمعلمين.
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto">
+                    {outgoingRequests.map((req) => (
+                      <div
+                        key={req.relationId}
+                        className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b25] border border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <UserAvatar
+                            name={req.user?.name || 'مستخدم'}
+                            role={req.user?.role}
+                            size="md"
+                          />
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-900 dark:text-white truncate block">
+                              {req.user?.name}
+                            </span>
+                            <div className="flex items-center gap-1.5 mt-0.5 font-mono text-[10px] text-[#800020] dark:text-rose-400 font-bold">
+                              <span className="bg-rose-100 dark:bg-rose-950 px-1.5 py-0.2 rounded">كود: {req.user?.userCode}</span>
+                              <span>·</span>
+                              <span>{req.user?.schoolClass ? `شعبة ${req.user.schoolClass}` : req.user?.gradeOrSubject}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-bold text-[#800020] dark:text-rose-300 bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 px-2 py-0.5 rounded flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[#800020] dark:text-rose-400 animate-pulse" />
+                            <span>بانتظار الرد ⏳</span>
+                          </span>
+
+                          {onCancelRequest && (
+                            <button
+                              onClick={() => handleCancelOutgoing(req.relationId, req.user?.name)}
+                              className="px-2 py-1 rounded bg-stone-200 dark:bg-stone-800 hover:bg-rose-100 hover:text-rose-600 text-slate-600 dark:text-stone-400 text-[10px] font-bold transition-colors cursor-pointer"
+                              title="إلغاء الطلب"
+                            >
+                              إلغاء
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-5 space-y-3 shadow-xs transition-colors">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  {activeDirectoryTab === 'boys' && 'سجل الطلاب (قسم البنين)'}
+                  {activeDirectoryTab === 'girls' && 'سجل الطالبات (قسم البنات)'}
+                  {activeDirectoryTab === 'teachers' && 'سجل هيئة التدريس (المعلمين)'}
+                </h3>
+                <span className="text-xs font-bold text-[#800020] dark:text-rose-300 bg-rose-50 dark:bg-[#20040c] px-2 py-0.5 rounded-full border border-[#800020]/20 dark:border-rose-500/30">
+                  {filteredUsers.length} متاح
+                </span>
+              </div>
+
+              {filteredUsers.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 dark:text-stone-500 bg-stone-50 dark:bg-[#1a1b24] rounded-xl space-y-2">
+                  <Users2 className="w-8 h-8 text-stone-300 dark:text-stone-600 mx-auto" />
+                  <p className="text-xs font-medium">
+                    {selectedBranchFilter !== 'all' 
+                      ? `لا يوجد طلاب مسجلون حالياً في شعبة ${selectedBranchFilter}. بمجرد تسجيل أي طالب دخوله واختيار هذه الشعبة سيظهر هنا فوراً!`
+                      : 'لا يوجد مستخدمون مطابقون لبحثك في هذا القسم حالياً.'}
+                  </p>
+                  {selectedBranchFilter !== 'all' && (
+                    <button
+                      onClick={() => setSelectedBranchFilter('all')}
+                      className="text-xs text-[#800020] dark:text-rose-400 font-bold hover:underline cursor-pointer"
+                    >
+                      عرض جميع الشعب
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2.5 max-h-[460px] overflow-y-auto">
+                  {filteredUsers.map((user) => {
+                    const isFriend = friendIds.includes(user.id);
+
+                    return (
+                      <div
+                        key={user.id}
+                        className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b25] border border-stone-200 dark:border-stone-800 hover:border-[#800020]/40 dark:hover:border-rose-500/40 transition-colors flex items-center justify-between text-xs"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <UserAvatar
+                            name={user.name}
+                            role={user.role}
+                            size="md"
+                            showStatus
+                            statusOnline
+                          />
+                          <div className="min-w-0">
+                            <div className="font-bold text-slate-900 dark:text-white truncate text-xs">{user.name}</div>
+                            
+                            <div className="text-[11px] text-[#800020] dark:text-rose-400 font-medium truncate flex items-center gap-1.5 mt-0.5">
+                              <span>{user.gradeOrSubject}</span>
+                              {user.schoolClass && (
+                                <>
+                                  <span>·</span>
+                                  <span className="font-mono bg-rose-100 dark:bg-rose-950 text-[#800020] dark:text-rose-300 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                    {user.role === 'student' ? `شعبة ${user.schoolClass}` : user.schoolClass}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Unified Academic Code Badge with Copy Action */}
+                            <div className="flex items-center gap-1.5 mt-1 font-mono text-[10px]">
+                              <span className="bg-rose-100/80 dark:bg-rose-950/90 text-[#800020] dark:text-rose-300 px-1.5 py-0.2 rounded font-bold border border-[#800020]/20 flex items-center gap-1">
+                                <span>كود:</span>
+                                <span>{user.userCode}</span>
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard?.writeText(user.userCode);
+                                  setRequestSentFeedback(`تم نسخ كود الزميل (${user.userCode})`);
+                                  setTimeout(() => setRequestSentFeedback(null), 2500);
+                                }}
+                                className="p-0.5 text-slate-400 hover:text-[#800020] dark:hover:text-rose-300 transition-colors cursor-pointer"
+                                title="نسخ كود الزميل"
+                              >
+                                <Copy className="w-2.5 h-2.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-1.5">
+                          {isFriend ? (
+                            <button
+                              onClick={() => setActiveChatUser(user)}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span>مراسلة</span>
+                            </button>
+                          ) : (outgoingPendingUserIds.includes(user.id) || localPendingIds.includes(user.id)) ? (
+                            <div className="px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-[#20040c] text-[#800020] dark:text-rose-300 border border-[#800020]/30 dark:border-rose-500/30 text-[11px] font-bold flex items-center gap-1 select-none shadow-2xs">
+                              <Sparkles className="w-3 h-3 text-[#800020] dark:text-rose-400 animate-pulse" />
+                              <span>طلب معلق ⏳</span>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleSendRequest(user.id, user.name)}
+                              className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#222432] hover:bg-gradient-to-r hover:from-[#5e091e] hover:to-[#800020] text-[#800020] dark:text-rose-300 hover:text-white border border-[#800020]/30 dark:border-rose-500/30 font-bold transition-all text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs active:scale-95"
+                            >
+                              <UserPlus className="w-3 h-3" />
+                              <span>إضافة صديق</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 

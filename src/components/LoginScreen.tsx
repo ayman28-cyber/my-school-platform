@@ -18,7 +18,7 @@ import { useTheme } from '../context/ThemeContext';
 
 interface LoginScreenProps {
   onLogin: (name: string, role: UserRole, gender: 'male' | 'female', gradeOrSubject: string, schoolClass?: string) => Promise<void>;
-  existingUsers: Array<{ name: string; role: UserRole; gender?: 'male' | 'female'; avatar: string; gradeOrSubject: string; schoolClass?: string }>;
+  existingUsers: Array<{ name: string; role: UserRole; gender?: 'male' | 'female'; avatar: string; gradeOrSubject: string; schoolClass?: string; userCode?: string }>;
   onReplaySplash?: () => void;
 }
 
@@ -393,7 +393,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                         size="sm"
                       />
                       <div className="min-w-0">
-                        <span className="font-bold text-slate-900 dark:text-white block truncate text-[11px]">{u.name}</span>
+                        <div className="flex items-center gap-1.5 justify-between">
+                          <span className="font-bold text-slate-900 dark:text-white block truncate text-[11px]">{u.name}</span>
+                          {u.userCode && (
+                            <span className="font-mono text-[9px] bg-rose-100 dark:bg-rose-950 text-[#800020] dark:text-rose-300 px-1 rounded font-black">
+                              {u.userCode}
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px] text-[#800020] dark:text-rose-300 block truncate font-mono">
                           {u.schoolClass} · {u.gender === 'female' ? 'بنات' : 'بنين'}
                         </span>

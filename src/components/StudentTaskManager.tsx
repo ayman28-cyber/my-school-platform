@@ -17,7 +17,7 @@ interface StudentTaskManagerProps {
     dueDate: string;
     priority: 'عاجل' | 'متوسط' | 'عادي';
     notes?: string;
-  }) => void;
+  }) => Promise<void> | void;
   onToggleTask: (taskId: string) => void;
   onDeleteTask: (taskId: string) => void;
 }
@@ -45,6 +45,8 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<'عاجل' | 'متوسط' | 'عادي'>('متوسط');
   const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successBanner, setSuccessBanner] = useState<string | null>(null);
 
   const completedCount = tasks.filter(t => t.completed).length;
 
@@ -54,25 +56,45 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
     return true;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || isSubmitting) return;
 
-    onAddTask({
-      title: title.trim(),
-      subject,
-      dueDate: dueDate.trim() || 'اليوم',
-      priority,
-      notes: notes.trim() || undefined
-    });
+    setIsSubmitting(true);
+    try {
+      await onAddTask({
+        title: title.trim(),
+        subject,
+        dueDate: dueDate.trim() || 'اليوم',
+        priority,
+        notes: notes.trim() || undefined
+      });
 
-    setTitle('');
-    setNotes('');
-    setShowAddModal(false);
+      const taskTitle = title.trim();
+      setTitle('');
+      setNotes('');
+      setDueDate('');
+      setShowAddModal(false);
+      setSuccessBanner(`تمت إضافة المهمة «${taskTitle}» وحفظها بنجاح في قاعدة بيانات المدرسة!`);
+      setTimeout(() => setSuccessBanner(null), 3500);
+    } catch {
+      // ignore
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-sm space-y-5 transition-colors">
+      {successBanner && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center justify-between animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{successBanner}</span>
+          </div>
+          <button onClick={() => setSuccessBanner(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#7d0d2b]/15 dark:border-rose-900/30">
         <div>
@@ -297,9 +319,10 @@ export const StudentTaskManager: React.FC<StudentTaskManagerProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] text-white font-bold shadow-md shadow-[#800020]/20 cursor-pointer"
+                  disabled={isSubmitting || !title.trim()}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-black via-[#5e091e] to-[#800020] hover:from-[#1b0208] hover:to-[#991136] disabled:opacity-50 text-white font-bold shadow-md shadow-[#800020]/20 cursor-pointer"
                 >
-                  حفظ المهمة في قائمتي
+                  {isSubmitting ? 'جارٍ الحفظ في السيرفر...' : 'حفظ المهمة في قائمتي'}
                 </button>
               </div>
             </form>

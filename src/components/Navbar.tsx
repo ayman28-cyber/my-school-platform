@@ -22,6 +22,7 @@ interface NavbarProps {
   currentUser: User;
   onLogout: () => void;
   onOpenTutorial: () => void;
+  onOpenProfile: () => void;
   onOpenCodeExport?: () => void;
   incomingRequestsCount?: number;
   onReplaySplash?: () => void;
@@ -33,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   onLogout,
   onOpenTutorial,
+  onOpenProfile,
   incomingRequestsCount = 0,
   onReplaySplash
 }) => {
@@ -183,27 +185,40 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <div className="h-6 w-px bg-stone-200 dark:bg-stone-800 hidden sm:block" />
 
-          {/* User Profile with Letter Avatar & Logout */}
-          <div className="flex items-center gap-2 p-1 pr-2 rounded-xl border border-[#800020]/20 dark:border-rose-500/20 bg-rose-50/40 dark:bg-[#161720]">
-            <UserAvatar
-              name={currentUser.name}
-              role={currentUser.role}
-              size="sm"
-              showStatus
-              statusOnline
-            />
-            <div className="hidden sm:flex flex-col text-right">
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white leading-tight truncate max-w-[100px]">
-                {currentUser.name}
-              </span>
-              <span className="text-[10px] text-[#800020] dark:text-rose-400 font-bold">
-                {currentUser.role === 'teacher' ? 'حساب المعلم 🎓' : 'حساب الطالب 📘'}
-              </span>
-            </div>
+          {/* User Profile with Letter Avatar, Unified Code & Profile Trigger */}
+          <div className="flex items-center gap-1.5 p-1 pr-1.5 rounded-xl border border-[#800020]/25 dark:border-rose-500/25 bg-rose-50/50 dark:bg-[#161720]">
+            <button
+              onClick={onOpenProfile}
+              className="flex items-center gap-2 text-right p-1 rounded-lg hover:bg-rose-100/70 dark:hover:bg-[#202230] transition-colors cursor-pointer group"
+              title="اضغط لعرض بياناتك الأكاديمية وكودك الخاص"
+            >
+              <div className="group-hover:scale-105 transition-transform">
+                <UserAvatar
+                  name={currentUser.name}
+                  role={currentUser.role}
+                  size="sm"
+                  showStatus
+                  statusOnline
+                />
+              </div>
+              <div className="hidden sm:flex flex-col text-right leading-tight">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-black text-xs text-slate-900 dark:text-white group-hover:text-[#800020] dark:group-hover:text-rose-400 truncate max-w-[90px] transition-colors">
+                    {currentUser.name}
+                  </span>
+                  <span className="font-mono text-[10px] font-black bg-[#800020] text-white dark:bg-rose-950 dark:text-rose-200 px-1 rounded">
+                    {currentUser.userCode}
+                  </span>
+                </div>
+                <span className="text-[10px] text-[#800020] dark:text-rose-400 font-bold">
+                  {currentUser.role === 'teacher' ? 'حساب المعلم 🎓' : 'حساب الطالب 📘'}
+                </span>
+              </div>
+            </button>
 
             <button
               onClick={onLogout}
-              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-100/60 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
               title="تبديل الحساب أو تسجيل الخروج"
             >
               <LogOut className="w-3.5 h-3.5" />

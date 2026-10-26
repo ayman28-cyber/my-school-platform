@@ -29,6 +29,7 @@ const freshDatabase: DatabaseSchema = {
   users: [
     {
       id: 'u-teacher-1',
+      userCode: 'MS-1001',
       name: 'أ. محمد المنصور',
       role: 'teacher',
       gender: 'male',
@@ -41,6 +42,7 @@ const freshDatabase: DatabaseSchema = {
     },
     {
       id: 'u-teacher-2',
+      userCode: 'MS-1002',
       name: 'أ. مريم الدوسري',
       role: 'teacher',
       gender: 'female',
@@ -53,6 +55,7 @@ const freshDatabase: DatabaseSchema = {
     },
     {
       id: 'u-student-1',
+      userCode: 'MS-2001',
       name: 'عبدالرحمن الشهري',
       role: 'student',
       gender: 'male',
@@ -65,6 +68,7 @@ const freshDatabase: DatabaseSchema = {
     },
     {
       id: 'u-student-2',
+      userCode: 'MS-2002',
       name: 'سارة الزهراني',
       role: 'student',
       gender: 'female',
@@ -86,6 +90,19 @@ const freshDatabase: DatabaseSchema = {
 
 let db: DatabaseSchema = freshDatabase;
 
+function generateUniqueUserCode(role?: string): string {
+  let tries = 0;
+  while (tries < 1000) {
+    const num = Math.floor(1000 + Math.random() * 9000);
+    const code = `MS-${num}`;
+    if (!db.users.some(u => u.userCode === code)) {
+      return code;
+    }
+    tries++;
+  }
+  return `MS-${Date.now().toString().slice(-4)}`;
+}
+
 async function initDatabase() {
   try {
     await fs.mkdir(path.dirname(DB_FILE), { recursive: true });
@@ -101,7 +118,38 @@ async function initDatabase() {
       db = freshDatabase;
       await fs.writeFile(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
     }
-    console.log('✨ Database initialized with user persistence and branch structure.');
+
+    // Ensure all existing users have a unique standardized userCode
+    let updated = false;
+    const usedCodes = new Set<string>();
+    db.users.forEach((u) => {
+      if (u.userCode) usedCodes.add(u.userCode);
+    });
+
+    db.users.forEach((u, i) => {
+      if (!u.userCode) {
+        let code = '';
+        if (u.id === 'u-teacher-1') code = 'MS-1001';
+        else if (u.id === 'u-teacher-2') code = 'MS-1002';
+        else if (u.id === 'u-student-1') code = 'MS-2001';
+        else if (u.id === 'u-student-2') code = 'MS-2002';
+        else {
+          let num = 2003 + i;
+          while (usedCodes.has(`MS-${num}`)) {
+            num++;
+          }
+          code = `MS-${num}`;
+        }
+        usedCodes.add(code);
+        u.userCode = code;
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      await persistDB();
+    }
+    console.log('✨ Database initialized with user persistence, branch structure and unique user codes.');
   } catch (err) {
     console.error('Error initializing database file:', err);
   }
@@ -135,13 +183,17 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
     if (gender) existing.gender = selectedGender;
     if (gradeOrSubject) existing.gradeOrSubject = gradeOrSubject;
     if (schoolClass) existing.schoolClass = schoolClass;
+    if (!existing.userCode) {
+      existing.userCode = generateUniqueUserCode(selectedRole);
+    }
     await persistDB();
     return res.json(existing);
   }
 
-  // Create real persistent user
+  // Create real persistent user with unified unique academic userCode
   const newUser = {
     id: `u-${selectedRole}-${Date.now()}`,
+    userCode: generateUniqueUserCode(selectedRole),
     name: cleanName,
     role: selectedRole,
     gender: selectedGender,
@@ -164,13 +216,44 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
   res.status(201).json(newUser);
 });
 
-// --- 2. Users directory ---
+// Update user profile
+app.patch('/api/users/:id', async (req: Request, res: Response) => {
+  const user = db.users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
+
+  const { name, schoolClass, gradeOrSubject, gender, email } = req.body;
+  if (name && name.trim()) user.name = name.trim();
+  if (schoolClass) user.schoolClass = schoolClass;
+  if (gradeOrSubject) user.gradeOrSubject = gradeOrSubject;
+  if (gender) user.gender = gender;
+  if (email) user.email = email;
+
+  await persistDB();
+  res.json(user);
+});
+
+// --- 2. Users directory with search & code filtering ---
 app.get('/api/users', (req: Request, res: Response) => {
   const role = req.query.role as string;
+  const search = (req.query.search as string || '').toLowerCase().trim();
+  const code = (req.query.code as string || '').toLowerCase().trim();
+
+  let list = db.users;
   if (role) {
-    return res.json(db.users.filter(u => u.role === role));
+    list = list.filter(u => u.role === role);
   }
-  res.json(db.users);
+  if (code) {
+    list = list.filter(u => u.userCode && u.userCode.toLowerCase() === code);
+  }
+  if (search) {
+    list = list.filter(u => 
+      u.name.toLowerCase().includes(search) || 
+      (u.userCode && u.userCode.toLowerCase().includes(search)) ||
+      (u.schoolClass && u.schoolClass.toLowerCase().includes(search)) ||
+      (u.gradeOrSubject && u.gradeOrSubject.toLowerCase().includes(search))
+    );
+  }
+  res.json(list);
 });
 
 // --- 3. Student Tasks API ---
@@ -422,11 +505,18 @@ app.get('/api/friends/:userId', (req: Request, res: Response) => {
     createdAt: r.createdAt
   }));
 
+  const outgoingRequests = pendingOutgoing.map(r => ({
+    relationId: r.id,
+    user: db.users.find(u => u.id === r.recipientId),
+    createdAt: r.createdAt
+  }));
+
   const outgoingPendingUserIds = pendingOutgoing.map(r => r.recipientId);
 
   res.json({
     friends: friendsList,
     incomingRequests,
+    outgoingRequests,
     outgoingPendingUserIds
   });
 });
@@ -467,6 +557,16 @@ app.post('/api/friends/respond', async (req: Request, res: Response) => {
   rel.status = accept ? 'accepted' : 'rejected';
   await persistDB();
   res.json({ success: true, status: rel.status });
+});
+
+app.post('/api/friends/cancel', async (req: Request, res: Response) => {
+  const { relationId, requesterId } = req.body;
+  const idx = db.friends.findIndex(r => r.id === relationId && (!requesterId || r.requesterId === requesterId));
+  if (idx === -1) return res.status(404).json({ error: 'الطلب غير موجود أو تم إلغاؤه' });
+
+  db.friends.splice(idx, 1);
+  await persistDB();
+  res.json({ success: true, message: 'تم إلغاء طلب الصداقة بنجاح' });
 });
 
 // --- 8. Messages ---

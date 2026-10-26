@@ -26,6 +26,7 @@ export interface UserStats {
 
 export interface User {
   id: string;
+  userCode: string;
   name: string;
   role: UserRole;
   gender?: 'male' | 'female';

@@ -15,6 +15,7 @@ export const api = {
     }
     const fallbackUser: User = {
       id: `u-${role}-${Date.now()}`,
+      userCode: `MS-${Math.floor(1000 + Math.random() * 9000)}`,
       name: name.trim(),
       role,
       gender: gender || 'male',
@@ -26,16 +27,34 @@ export const api = {
       gradeOrSubject: gradeOrSubject || (role === 'teacher' ? 'الفيزياء' : 'أولى ثانوي'),
       email: `${name.replace(/\s+/g, '.').toLowerCase()}@myschool.edu`,
       schoolClass: schoolClass || (role === 'teacher' ? 'هيئة التدريس' : '1/1'),
-      badges: [role === 'teacher' ? 'معلم في My School' : 'طالب في My School'],
+      badges: [role === 'teacher' ? 'معلم معتمد في My School' : 'طالب في My School'],
       stats: { completedLessons: 0, gpa: 96.0, attendanceRate: 100, points: 500 }
     };
     return fallbackUser;
   },
 
-  // 2. Users directory
-  async getUsers(role?: string): Promise<User[]> {
+  // 1.5 Update User Profile
+  async updateUserProfile(userId: string, data: Partial<User>): Promise<User | null> {
     try {
-      const url = role ? `/api/users?role=${role}` : '/api/users';
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) return await res.json();
+    } catch {
+      // fallback
+    }
+    return null;
+  },
+
+  // 2. Users directory
+  async getUsers(role?: string, search?: string): Promise<User[]> {
+    try {
+      const params = new URLSearchParams();
+      if (role) params.append('role', role);
+      if (search) params.append('search', search);
+      const url = params.toString() ? `/api/users?${params.toString()}` : '/api/users';
       const res = await fetch(url);
       if (res.ok) return await res.json();
     } catch {
@@ -44,15 +63,39 @@ export const api = {
     return [];
   },
 
-  // 3. Student Tasks (User-driven task manager)
+  // 3. Student Tasks (Real Database Tasks)
   async getTasks(studentId: string): Promise<StudentTask[]> {
+    let serverTasks: StudentTask[] = [];
     try {
       const res = await fetch(`/api/tasks/${studentId}`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        serverTasks = await res.json();
+      }
     } catch {
-      // Fallback
+      // ignore
     }
-    return [];
+
+    // Merge with any cached tasks
+    try {
+      const cachedStr = localStorage.getItem(`myschool_tasks_${studentId}`);
+      if (cachedStr) {
+        const cached: StudentTask[] = JSON.parse(cachedStr);
+        const map = new Map<string, StudentTask>();
+        [...serverTasks, ...cached].forEach(t => map.set(t.id, t));
+        return Array.from(map.values());
+      }
+    } catch {
+      // ignore
+    }
+
+    if (serverTasks.length > 0) {
+      try {
+        localStorage.setItem(`myschool_tasks_${studentId}`, JSON.stringify(serverTasks));
+      } catch {
+        // ignore
+      }
+    }
+    return serverTasks;
   },
 
   async createTask(taskData: {
@@ -69,11 +112,41 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskData)
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const created: StudentTask = await res.json();
+        try {
+          const cachedStr = localStorage.getItem(`myschool_tasks_${taskData.studentId}`);
+          const current: StudentTask[] = cachedStr ? JSON.parse(cachedStr) : [];
+          localStorage.setItem(`myschool_tasks_${taskData.studentId}`, JSON.stringify([created, ...current]));
+        } catch {
+          // ignore
+        }
+        return created;
+      }
     } catch {
-      // Fallback
+      // Fallback local persistence
     }
-    return null;
+
+    // Resilient fallback task
+    const fallbackTask: StudentTask = {
+      id: `task-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      studentId: taskData.studentId,
+      title: taskData.title,
+      subject: taskData.subject as any,
+      dueDate: taskData.dueDate || 'قريباً',
+      priority: taskData.priority,
+      completed: false,
+      notes: taskData.notes,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    try {
+      const cachedStr = localStorage.getItem(`myschool_tasks_${taskData.studentId}`);
+      const current: StudentTask[] = cachedStr ? JSON.parse(cachedStr) : [];
+      localStorage.setItem(`myschool_tasks_${taskData.studentId}`, JSON.stringify([fallbackTask, ...current]));
+    } catch {
+      // ignore
+    }
+    return fallbackTask;
   },
 
   async toggleTask(taskId: string): Promise<StudentTask | null> {
@@ -224,6 +297,7 @@ export const api = {
   async getFriendsData(userId: string): Promise<{
     friends: User[];
     incomingRequests: { relationId: string; user?: User; createdAt: string }[];
+    outgoingRequests?: { relationId: string; user?: User; createdAt: string }[];
     outgoingPendingUserIds?: string[];
   }> {
     try {
@@ -232,7 +306,7 @@ export const api = {
     } catch {
       // Fallback
     }
-    return { friends: [], incomingRequests: [], outgoingPendingUserIds: [] };
+    return { friends: [], incomingRequests: [], outgoingRequests: [], outgoingPendingUserIds: [] };
   },
 
   async sendFriendRequest(requesterId: string, recipientId: string): Promise<{ success: boolean; message?: string }> {
@@ -256,6 +330,19 @@ export const api = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ relationId, accept })
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async cancelFriendRequest(relationId: string, requesterId: string): Promise<boolean> {
+    try {
+      const res = await fetch('/api/friends/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relationId, requesterId })
       });
       return res.ok;
     } catch {

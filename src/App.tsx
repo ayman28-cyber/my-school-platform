@@ -13,6 +13,7 @@ import { FriendsSection } from './components/FriendsSection';
 import { VideoLibrary } from './components/VideoLibrary';
 import { WalkthroughVideoModal } from './components/WalkthroughVideoModal';
 import { SplashScreen } from './components/SplashScreen';
+import { UserProfileModal } from './components/UserProfileModal';
 import { api } from './services/api';
 import { User, NewsItem, VideoLesson, StudentProgress, ChatMessage, StudentTask, SubjectCategory, UserRole } from './types';
 
@@ -31,12 +32,14 @@ export default function App() {
   const [progressList, setProgressList] = useState<StudentProgress[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<{ relationId: string; user?: User; createdAt: string }[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<{ relationId: string; user?: User; createdAt: string }[]>([]);
   const [outgoingRequestIds, setOutgoingRequestIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
   // Modals & sub-views
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [showTutorialModal, setShowTutorialModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const broadcastSync = (type: string) => {
     if (typeof BroadcastChannel !== 'undefined') {
@@ -100,6 +103,7 @@ export default function App() {
       const friendsData = await api.getFriendsData(currentUser.id);
       setFriends(friendsData.friends);
       setIncomingRequests(friendsData.incomingRequests);
+      setOutgoingRequests(friendsData.outgoingRequests || []);
       setOutgoingRequestIds(friendsData.outgoingPendingUserIds || []);
 
       // Load message thread
@@ -133,7 +137,14 @@ export default function App() {
           if (!isMounted) return;
           setFriends(freshFriends.friends);
           setIncomingRequests(freshFriends.incomingRequests);
+          setOutgoingRequests(freshFriends.outgoingRequests || []);
           setOutgoingRequestIds(freshFriends.outgoingPendingUserIds || []);
+
+          if (currentUser.role === 'student') {
+            const freshTasks = await api.getTasks(currentUser.id);
+            if (!isMounted) return;
+            setTasks(freshTasks);
+          }
         }
       } catch {
         // network silent
@@ -185,7 +196,7 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // Student Task Handlers (Real student-created tasks)
+  // Student Task Handlers (Persisted to database)
   const handleAddTask = async (taskData: {
     title: string;
     subject: SubjectCategory;
@@ -200,7 +211,12 @@ export default function App() {
     });
 
     if (created) {
-      setTasks(prev => [created, ...prev]);
+      setTasks(prev => {
+        const exists = prev.some(t => t.id === created.id);
+        if (exists) return prev;
+        return [created, ...prev];
+      });
+      broadcastSync('TASK_ADDED');
     }
   };
 
@@ -208,6 +224,7 @@ export default function App() {
     const updated = await api.toggleTask(taskId);
     if (updated) {
       setTasks(prev => prev.map(t => t.id === taskId ? updated : t));
+      broadcastSync('TASK_TOGGLED');
     }
   };
 
@@ -215,6 +232,20 @@ export default function App() {
     const success = await api.deleteTask(taskId);
     if (success) {
       setTasks(prev => prev.filter(t => t.id !== taskId));
+      broadcastSync('TASK_DELETED');
+    }
+  };
+
+  // Update profile
+  const handleUpdateProfile = async (updatedData: Partial<User>) => {
+    if (!currentUser) return;
+    const updated = await api.updateUserProfile(currentUser.id, updatedData);
+    if (updated) {
+      setCurrentUser(updated);
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(updated));
+      const freshUsers = await api.getUsers();
+      setAllUsers(freshUsers);
+      broadcastSync('USER_UPDATED');
     }
   };
 
@@ -299,6 +330,7 @@ export default function App() {
     const data = await api.getFriendsData(currentUser.id);
     setFriends(data.friends);
     setIncomingRequests(data.incomingRequests);
+    setOutgoingRequests(data.outgoingRequests || []);
     setOutgoingRequestIds(data.outgoingPendingUserIds || []);
     broadcastSync('FRIEND_REQUEST');
   };
@@ -310,8 +342,22 @@ export default function App() {
       const data = await api.getFriendsData(currentUser.id);
       setFriends(data.friends);
       setIncomingRequests(data.incomingRequests);
+      setOutgoingRequests(data.outgoingRequests || []);
       setOutgoingRequestIds(data.outgoingPendingUserIds || []);
       broadcastSync('FRIEND_RESPONDED');
+    }
+  };
+
+  const handleCancelFriendRequest = async (relationId: string) => {
+    if (!currentUser) return;
+    const success = await api.cancelFriendRequest(relationId, currentUser.id);
+    if (success) {
+      const data = await api.getFriendsData(currentUser.id);
+      setFriends(data.friends);
+      setIncomingRequests(data.incomingRequests);
+      setOutgoingRequests(data.outgoingRequests || []);
+      setOutgoingRequestIds(data.outgoingPendingUserIds || []);
+      broadcastSync('FRIEND_CANCELLED');
     }
   };
 
@@ -358,7 +404,8 @@ export default function App() {
             gender: u.gender,
             avatar: u.avatar,
             gradeOrSubject: u.gradeOrSubject,
-            schoolClass: u.schoolClass
+            schoolClass: u.schoolClass,
+            userCode: u.userCode
           }))}
         />
       </>
@@ -382,6 +429,7 @@ export default function App() {
         currentUser={currentUser}
         onLogout={handleLogout}
         onOpenTutorial={() => setShowTutorialModal(true)}
+        onOpenProfile={() => setShowProfileModal(true)}
         incomingRequestsCount={incomingRequests.length}
         onReplaySplash={() => setShowSplash(true)}
       />
@@ -444,10 +492,12 @@ export default function App() {
             allUsers={allUsers}
             friends={friends}
             incomingRequests={incomingRequests}
+            outgoingRequests={outgoingRequests}
             outgoingPendingUserIds={outgoingRequestIds}
             messages={messages}
             onSendFriendRequest={handleSendFriendRequest}
             onRespondRequest={handleRespondFriendRequest}
+            onCancelRequest={handleCancelFriendRequest}
             onSendMessage={handleSendMessage}
             onRefreshUsers={handleRefreshUsers}
           />
@@ -490,6 +540,16 @@ export default function App() {
         onClose={() => setShowTutorialModal(false)}
         onNavigateTab={setActiveTab}
       />
+
+      {/* User Profile & Unified Academic Code Modal */}
+      {showProfileModal && currentUser && (
+        <UserProfileModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          user={currentUser}
+          onUpdateProfile={handleUpdateProfile}
+        />
+      )}
 
     </div>
   );
