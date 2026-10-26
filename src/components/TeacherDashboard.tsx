@@ -135,11 +135,11 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         
         {/* Left Column (8 cols): Real Registered Students Roster */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs">
+          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-xs transition-colors">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-base font-extrabold text-slate-900">سجل متابعة الطلاب المسجلين الحقيقي</h3>
-                <p className="text-xs text-slate-500">إدارة نسب الإنجاز ورصد الملاحظات التعليمية الفردية</p>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">سجل متابعة الطلاب المسجلين الحقيقي</h3>
+                <p className="text-xs text-slate-500 dark:text-stone-400">إدارة نسب الإنجاز ورصد الملاحظات التعليمية الفردية</p>
               </div>
 
               {/* Filters */}
@@ -151,13 +151,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="ابحث بالاسم..."
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl pr-8 pl-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#800020]"
+                    className="w-full bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 rounded-xl pr-8 pl-3 py-1.5 text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#800020]"
                   />
                 </div>
                 <select
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className="bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-[#800020] font-medium"
+                  className="bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 dark:text-stone-200 focus:outline-none focus:border-[#800020] font-medium"
                 >
                   <option value="all">كل الشعب والصفوف</option>
                   <optgroup label="أولى ثانوي (12 شعبة)">
@@ -180,7 +180,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-right text-xs">
                 <thead>
-                  <tr className="border-b border-[#7d0d2b]/15 text-slate-400 font-bold">
+                  <tr className="border-b border-[#7d0d2b]/15 dark:border-rose-900/30 text-slate-400 dark:text-stone-400 font-bold">
                     <th className="pb-3 pr-2">الطالب</th>
                     <th className="pb-3 px-3">الشعبة</th>
                     <th className="pb-3 px-3">المعدل</th>
@@ -188,9 +188,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     <th className="pb-3 pl-2 text-left">إجراء المعلم</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
                   {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-rose-50/30 transition-colors">
+                    <tr key={student.id} className="hover:bg-rose-50/30 dark:hover:bg-rose-950/20 transition-colors">
                       <td className="py-3.5 pr-2">
                         <div className="flex items-center gap-3">
                           <UserAvatar
@@ -199,22 +199,22 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                             size="sm"
                           />
                           <div>
-                            <div className="font-bold text-slate-900">{student.name}</div>
-                            <div className="text-[11px] text-slate-400 font-mono">{student.email}</div>
+                            <div className="font-bold text-slate-900 dark:text-white">{student.name}</div>
+                            <div className="text-[11px] text-slate-400 dark:text-stone-500 font-mono">{student.email}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-3 text-slate-600 font-medium">{student.schoolClass}</td>
-                      <td className="py-3.5 px-3 font-extrabold text-[#800020] tabular-nums">
+                      <td className="py-3.5 px-3 text-slate-600 dark:text-stone-300 font-medium">{student.schoolClass}</td>
+                      <td className="py-3.5 px-3 font-extrabold text-[#800020] dark:text-rose-400 tabular-nums">
                         {student.stats?.gpa}%
                       </td>
-                      <td className="py-3.5 px-3 font-bold text-emerald-600 tabular-nums">
+                      <td className="py-3.5 px-3 font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                         {student.stats?.attendanceRate}%
                       </td>
                       <td className="py-3.5 pl-2 text-left">
                         <button
                           onClick={() => handleSendFeedback(student.name)}
-                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-[#800020] text-[#800020] hover:text-white border border-[#800020]/25 font-bold transition-colors inline-flex items-center gap-1 text-[11px] cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-[#22040d] hover:bg-[#800020] dark:hover:bg-rose-900 text-[#800020] dark:text-rose-300 hover:text-white border border-[#800020]/25 dark:border-rose-500/30 font-bold transition-colors inline-flex items-center gap-1 text-[11px] cursor-pointer"
                         >
                           <Send className="w-3 h-3" />
                           توجيه ملاحظة
@@ -230,22 +230,22 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
         {/* Right Column (4 cols): Teacher Videos & Publishing */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-xs space-y-4 transition-colors">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <Video className="w-4 h-4 text-[#800020]" />
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Video className="w-4 h-4 text-[#800020] dark:text-rose-400" />
                 دروسك التعليمية
               </h3>
               <button
                 onClick={onOpenPublishModal}
-                className="text-xs text-[#800020] hover:text-[#9e1336] font-bold cursor-pointer"
+                className="text-xs text-[#800020] dark:text-rose-400 hover:text-[#9e1336] font-bold cursor-pointer"
               >
                 + إضافة
               </button>
             </div>
 
             {teacherVideos.length === 0 ? (
-              <div className="p-6 rounded-xl bg-stone-50 border border-stone-200 text-center text-slate-500 text-xs">
+              <div className="p-6 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 text-center text-slate-500 dark:text-stone-400 text-xs">
                 لم تقم برفع دروس أو وسائط بعد. اضغط على الزر أدناه لإضافة أول درس لطلابك.
               </div>
             ) : (
@@ -254,9 +254,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   <div
                     key={video.id}
                     onClick={() => onOpenLesson(video.id)}
-                    className="cursor-pointer group p-3 rounded-xl bg-stone-50 border border-stone-200 hover:border-[#800020]/40 transition-all flex items-center gap-3"
+                    className="cursor-pointer group p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 hover:border-[#800020]/40 dark:hover:border-rose-600/40 transition-all flex items-center gap-3"
                   >
-                    <div className="w-16 h-12 rounded-lg overflow-hidden bg-stone-200 shrink-0 relative flex items-center justify-center">
+                    <div className="w-16 h-12 rounded-lg overflow-hidden bg-stone-200 dark:bg-stone-900 shrink-0 relative flex items-center justify-center">
                       {video.mediaType === 'image' ? (
                         <img
                           src={video.mediaData || video.thumbnail}

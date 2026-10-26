@@ -97,18 +97,18 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
     <div className="space-y-8 animate-fadeIn">
       
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[#7d0d2b]/20">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[#7d0d2b]/20 dark:border-rose-900/30">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-              <Newspaper className="w-6 h-6 text-[#800020]" />
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Newspaper className="w-6 h-6 text-[#800020] dark:text-rose-400" />
               أخبار المواد والأنشطة الأكاديمية
             </h2>
-            <span className="text-[11px] font-bold text-[#800020] bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-[#800020] dark:text-rose-300 bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 px-2 py-0.5 rounded-full">
               My School
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-stone-400 mt-1">
             إعلانات المواد الدراسية مقسمة حسب التخصص، مع تمكين المعلمين فقط من النشر والتفاعل التام للطلاب
           </p>
         </div>
@@ -124,8 +124,8 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               نشر خبر جديد كمعلم
             </button>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-[#800020]/25 text-[#800020] text-xs font-semibold">
-              <Lock className="w-3.5 h-3.5 text-[#800020]" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 text-[#800020] dark:text-rose-300 text-xs font-semibold">
+              <Lock className="w-3.5 h-3.5 text-[#800020] dark:text-rose-400" />
               <span>نشر الأخبار مقتصر على المعلمين</span>
             </div>
           )}
@@ -135,8 +135,8 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
       {publishFeedback && (
         <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center justify-between animate-fadeIn ${
           publishFeedback.isError
-            ? 'bg-rose-50 border border-rose-300 text-rose-800'
-            : 'bg-emerald-50 border border-emerald-300 text-emerald-800'
+            ? 'bg-rose-50 dark:bg-rose-950/80 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+            : 'bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
         }`}>
           <span>{publishFeedback.msg}</span>
           {publishFeedback.isError ? <ShieldAlert className="w-4 h-4 text-rose-600" /> : <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
@@ -144,7 +144,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
       )}
 
       {/* Categories Bar */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-[#7d0d2b]/20 rounded-2xl overflow-x-auto text-xs shadow-2xs">
+      <div className="flex items-center gap-1.5 p-1.5 bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl overflow-x-auto text-xs shadow-2xs transition-colors">
         {NEWS_CATEGORIES.map((cat) => (
           <button
             key={cat}
@@ -152,7 +152,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             className={`px-3.5 py-2 rounded-xl whitespace-nowrap transition-all font-bold cursor-pointer ${
               selectedCategory === cat
                 ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/20'
-                : 'text-slate-600 hover:text-[#800020] hover:bg-rose-50/50'
+                : 'text-slate-600 dark:text-stone-300 hover:text-[#800020] dark:hover:text-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/30'
             }`}
           >
             {cat === 'all' ? 'جميع المواد' : `أخبار ${cat}`}
@@ -166,15 +166,15 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
         {/* Main Feed Column (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
           {filteredNews.length === 0 ? (
-            <div className="bg-white border border-[#7d0d2b]/20 rounded-3xl p-12 text-center text-slate-500 space-y-3 shadow-xs">
-              <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-[#800020]/25 text-[#800020] flex items-center justify-center mx-auto">
+            <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-3xl p-12 text-center text-slate-500 dark:text-stone-400 space-y-3 shadow-xs">
+              <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 text-[#800020] dark:text-rose-400 flex items-center justify-center mx-auto">
                 <Newspaper className="w-8 h-8" />
               </div>
               <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
                   لا توجد أخبار منشورة حالياً في {selectedCategory === 'all' ? 'المنصة' : `مادة ${selectedCategory}`}
                 </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-stone-400 leading-relaxed">
                   {isTeacher
                     ? `بصفتك معلماً، يمكنك الآن نشر أول خبر أو تعميم دراسي لطلابك في مادة ${selectedCategory === 'all' ? 'تخصصك' : selectedCategory}.`
                     : `لم يقم المعلم بنشر إعلانات في مادة ${selectedCategory === 'all' ? 'المنصة' : selectedCategory} بعد. ستظهر هنا فور نشرها.`}
@@ -195,10 +195,10 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             filteredNews.map((post) => (
               <article
                 key={post.id}
-                className="bg-white border border-[#7d0d2b]/20 rounded-2xl overflow-hidden shadow-xs hover:border-[#800020]/40 transition-all flex flex-col justify-between"
+                className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl overflow-hidden shadow-xs hover:border-[#800020]/40 dark:hover:border-rose-600/40 transition-all flex flex-col justify-between"
               >
                 {post.imageUrl && (
-                  <div className="aspect-[21/9] w-full overflow-hidden bg-stone-100">
+                  <div className="aspect-[21/9] w-full overflow-hidden bg-stone-100 dark:bg-stone-900">
                     <img
                       src={post.imageUrl}
                       alt={post.title}
@@ -210,30 +210,30 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
                 <div className="p-6 space-y-3">
                   {/* Clean Metadata with Letter Avatar */}
-                  <div className="flex items-center gap-2.5 text-xs text-slate-500 font-medium">
+                  <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-stone-400 font-medium">
                     <UserAvatar
                       name={post.author}
                       role="teacher"
                       size="xs"
                     />
-                    <span className="text-[#800020] font-bold">{post.category}</span>
+                    <span className="text-[#800020] dark:text-rose-400 font-bold">{post.category}</span>
                     <span aria-hidden="true">·</span>
-                    <span className="font-bold text-slate-800">{post.author}</span>
+                    <span className="font-bold text-slate-800 dark:text-stone-200">{post.author}</span>
                     <span aria-hidden="true">·</span>
                     <span>{post.date}</span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug">
                     {post.title}
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-stone-300 leading-relaxed">
                     {post.content}
                   </p>
 
                   {/* Clean Tags */}
                   {post.tags && (
-                    <div className="flex items-center gap-2 text-xs text-[#800020] pt-1 font-semibold">
+                    <div className="flex items-center gap-2 text-xs text-[#800020] dark:text-rose-400 pt-1 font-semibold">
                       {post.tags.map((tag, i) => (
                         <span key={i}>#{tag}</span>
                       ))}
@@ -242,11 +242,11 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 </div>
 
                 {/* Interaction Footer */}
-                <div className="px-6 py-3.5 bg-stone-50/70 border-t border-[#7d0d2b]/15 flex items-center justify-between text-xs text-slate-500">
+                <div className="px-6 py-3.5 bg-stone-50/70 dark:bg-[#181922] border-t border-[#7d0d2b]/15 dark:border-rose-900/30 flex items-center justify-between text-xs text-slate-500 dark:text-stone-400">
                   <div className="flex items-center gap-6">
                     <button
                       onClick={() => onLike(post.id)}
-                      className="flex items-center gap-1.5 hover:text-rose-600 transition-colors font-bold cursor-pointer"
+                      className="flex items-center gap-1.5 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-bold cursor-pointer"
                     >
                       <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
                       <span className="tabular-nums">{post.likes}</span>
@@ -255,43 +255,43 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
                     <button
                       onClick={() => setOpenCommentsId(openCommentsId === post.id ? null : post.id)}
-                      className="flex items-center gap-1.5 hover:text-[#800020] transition-colors font-bold cursor-pointer"
+                      className="flex items-center gap-1.5 hover:text-[#800020] dark:hover:text-rose-400 transition-colors font-bold cursor-pointer"
                     >
-                      <MessageSquare className="w-4 h-4 text-[#800020]" />
+                      <MessageSquare className="w-4 h-4 text-[#800020] dark:text-rose-400" />
                       <span className="tabular-nums">{post.comments.length}</span>
                       <span className="hidden sm:inline">تعليقات</span>
                     </button>
                   </div>
 
-                  <span className="text-[11px] text-[#800020] font-bold">
+                  <span className="text-[11px] text-[#800020] dark:text-rose-400 font-bold">
                     {post.authorRole}
                   </span>
                 </div>
 
                 {/* Collapsible Comments with Letter Avatars */}
                 {openCommentsId === post.id && (
-                  <div className="p-6 bg-stone-50 border-t border-[#7d0d2b]/15 space-y-4 animate-fadeIn">
-                    <h4 className="text-xs font-bold text-slate-800">
+                  <div className="p-6 bg-stone-50 dark:bg-[#181922] border-t border-[#7d0d2b]/15 dark:border-rose-900/30 space-y-4 animate-fadeIn">
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-stone-200">
                       مناقشات الطلاب والأساتذة ({post.comments.length})
                     </h4>
 
                     {post.comments.length === 0 ? (
-                      <p className="text-xs text-slate-500">لا توجد تعليقات بعد. اكتب أول تعليق على هذا الإعلان!</p>
+                      <p className="text-xs text-slate-500 dark:text-stone-400">لا توجد تعليقات بعد. اكتب أول تعليق على هذا الإعلان!</p>
                     ) : (
                       <div className="space-y-2.5">
                         {post.comments.map((c) => (
-                          <div key={c.id} className="p-3 rounded-xl bg-white border border-stone-200 text-xs space-y-1.5">
+                          <div key={c.id} className="p-3 rounded-xl bg-white dark:bg-[#20212c] border border-stone-200 dark:border-stone-800 text-xs space-y-1.5">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <UserAvatar
                                   name={c.userName}
                                   size="xs"
                                 />
-                                <span className="font-bold text-slate-900">{c.userName}</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{c.userName}</span>
                               </div>
-                              <span className="text-[10px] text-slate-400 font-mono">{c.date}</span>
+                              <span className="text-[10px] text-slate-400 dark:text-stone-500 font-mono">{c.date}</span>
                             </div>
-                            <p className="text-slate-600 leading-relaxed pr-7">{c.text}</p>
+                            <p className="text-slate-600 dark:text-stone-300 leading-relaxed pr-7">{c.text}</p>
                           </div>
                         ))}
                       </div>
@@ -305,7 +305,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                         value={commentInputs[post.id] || ''}
                         onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
                         onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit(post.id)}
-                        className="flex-1 bg-white border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#800020]"
+                        className="flex-1 bg-white dark:bg-[#20212c] border border-stone-300 dark:border-stone-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#800020]"
                       />
                       <button
                         onClick={() => handleCommentSubmit(post.id)}
@@ -323,30 +323,30 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
         {/* Sidebar Info (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
-            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#800020]" />
+          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-xs space-y-4 transition-colors">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[#800020] dark:text-rose-400" />
               التقويم المدرسي لمواد My School
             </h3>
 
             <div className="space-y-2.5 text-xs">
-              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-0.5">
-                <span className="text-[#800020] font-bold block">قسم البرمجة والحاسب</span>
-                <span className="text-slate-700">ورشة تطوير التطبيقات والذكاء الاصطناعي الأربعاء القادم</span>
+              <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 space-y-0.5">
+                <span className="text-[#800020] dark:text-rose-400 font-bold block">قسم البرمجة والحاسب</span>
+                <span className="text-slate-700 dark:text-stone-300">ورشة تطوير التطبيقات والذكاء الاصطناعي الأربعاء القادم</span>
               </div>
-              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-0.5">
-                <span className="text-[#800020] font-bold block">قسم الفيزياء والكيمياء</span>
-                <span className="text-slate-700">التجارب المعملية المركزية للأسبوع الثاني</span>
+              <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 space-y-0.5">
+                <span className="text-[#800020] dark:text-rose-400 font-bold block">قسم الفيزياء والكيمياء</span>
+                <span className="text-slate-700 dark:text-stone-300">التجارب المعملية المركزية للأسبوع الثاني</span>
               </div>
-              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-0.5">
-                <span className="text-[#800020] font-bold block">قسم اللغة العربية والإنجليزية</span>
-                <span className="text-slate-700">مسابقة المناظرات اللغوية والإلقاء</span>
+              <div className="p-3 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 space-y-0.5">
+                <span className="text-[#800020] dark:text-rose-400 font-bold block">قسم اللغة العربية والإنجليزية</span>
+                <span className="text-slate-700 dark:text-stone-300">مسابقة المناظرات اللغوية والإلقاء</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-rose-50/50 border border-[#7d0d2b]/25 rounded-2xl p-6 space-y-2 text-xs text-slate-600">
-            <h4 className="font-extrabold text-[#800020]">سياسة النشر في My School</h4>
+          <div className="bg-rose-50/50 dark:bg-[#1c070e] border border-[#7d0d2b]/25 dark:border-rose-900/40 rounded-2xl p-6 space-y-2 text-xs text-slate-600 dark:text-stone-300 transition-colors">
+            <h4 className="font-extrabold text-[#800020] dark:text-rose-300">سياسة النشر في My School</h4>
             <p className="leading-relaxed">
               حرصاً على مصداقية المحتوى الأكاديمي، تُمنح صلاحية نشر الأخبار والتعاميم للمعلمين المعتمدين وإدارة المدرسة فقط، بينما يتمتع الطلاب بحرية النقاش وطرح التساؤلات.
             </p>

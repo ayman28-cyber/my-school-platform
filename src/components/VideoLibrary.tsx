@@ -164,18 +164,18 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#7d0d2b]/20">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#7d0d2b]/20 dark:border-rose-900/30">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-[#800020]" />
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-[#800020] dark:text-rose-400" />
               مكتبة الدروس والوسائط التعليمية
             </h2>
-            <span className="text-[11px] font-bold text-[#800020] bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-[#800020] dark:text-rose-300 bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 px-2 py-0.5 rounded-full">
               My School
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-stone-400 mt-1">
             شروحات مرئية وصور تعليمية ينشرها المعلمون لطلابهم داخل كل مادة مباشرة
           </p>
         </div>
@@ -196,8 +196,8 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
               إضافة فيديو أو صورة لمادتي
             </button>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-[#800020]/25 text-[#800020] text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-[#800020]" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 text-[#800020] dark:text-rose-300 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-[#800020] dark:text-rose-400" />
               <span>متابعة الشروحات وحفظ التقدم</span>
             </div>
           )}
@@ -205,14 +205,14 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
       </div>
 
       {savedFeedback && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs flex items-center justify-between font-bold animate-fadeIn">
+        <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs flex items-center justify-between font-bold animate-fadeIn">
           <span>تم حفظ تقدمك وملاحظاتك بنجاح في قاعدة بيانات My School!</span>
           <Check className="w-4 h-4 text-emerald-600" />
         </div>
       )}
 
       {/* Subject Filter Bar in Burgundy & Black */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-white border border-[#7d0d2b]/20 rounded-2xl overflow-x-auto text-xs shadow-2xs">
+      <div className="flex items-center gap-1.5 p-1.5 bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl overflow-x-auto text-xs shadow-2xs transition-colors">
         {SUBJECT_FILTERS.map(subj => (
           <button
             key={subj}
@@ -220,7 +220,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
             className={`px-3.5 py-2 rounded-xl whitespace-nowrap transition-all font-bold cursor-pointer ${
               selectedSubject === subj
                 ? 'bg-gradient-to-r from-black via-[#5e091e] to-[#800020] text-white shadow-md shadow-[#800020]/20'
-                : 'text-slate-600 hover:text-[#800020] hover:bg-rose-50/50'
+                : 'text-slate-600 dark:text-stone-300 hover:text-[#800020] dark:hover:text-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/30'
             }`}
           >
             {subj === 'all' ? 'جميع المواد' : subj}
@@ -230,15 +230,15 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
 
       {/* Empty State when no lessons are uploaded yet */}
       {filteredVideos.length === 0 ? (
-        <div className="bg-white border border-[#7d0d2b]/20 rounded-3xl p-12 text-center text-slate-500 space-y-4 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-[#800020]/25 text-[#800020] flex items-center justify-center mx-auto">
+        <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-3xl p-12 text-center text-slate-500 dark:text-stone-400 space-y-4 shadow-sm transition-colors">
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 text-[#800020] dark:text-rose-400 flex items-center justify-center mx-auto">
             <BookOpen className="w-8 h-8" />
           </div>
           <div className="space-y-1 max-w-md mx-auto">
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
               لا توجد دروس أو فيديوهات مضافة بعد في {selectedSubject === 'all' ? 'المكتبة' : `مادة ${selectedSubject}`}
             </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-stone-400 leading-relaxed">
               {isTeacher
                 ? `بصفتك معلماً، يمكنك الآن رفع أول فيديو تعليمي أو صورة توضيحية لطلابك في مادة ${selectedSubject === 'all' ? 'تخصصك' : selectedSubject}.`
                 : `لم يقم المعلم بنشر شروحات أو وسائط في مادة ${selectedSubject === 'all' ? 'الدروس' : selectedSubject} بعد. ستظهر هنا فور إضافتها.`}
@@ -263,7 +263,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
       ) : (
         /* Video Player Stage */
         currentVideo && (
-          <div className="bg-white border border-[#7d0d2b]/20 rounded-3xl overflow-hidden shadow-lg">
+          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-3xl overflow-hidden shadow-lg transition-colors">
             <div className="grid grid-cols-1 lg:grid-cols-12">
               
               {/* Media Player Screen (8 cols) */}
@@ -350,16 +350,16 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
               </div>
 
               {/* Notes & Discussions Column (4 cols) */}
-              <div className="lg:col-span-4 p-6 bg-white border-t lg:border-t-0 lg:border-r border-[#7d0d2b]/20 space-y-6 flex flex-col justify-between">
+              <div className="lg:col-span-4 p-6 bg-white dark:bg-[#14151b] border-t lg:border-t-0 lg:border-r border-[#7d0d2b]/20 dark:border-rose-900/30 space-y-6 flex flex-col justify-between transition-colors">
                 
                 {/* Real User Notes */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-[#800020]" />
+                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-[#800020] dark:text-rose-400" />
                       مفكرتي وملاحظاتي الخاصة
                     </h4>
-                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full font-bold">
                       حفظ في السيرفر
                     </span>
                   </div>
@@ -368,7 +368,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                     placeholder="دوّن استنتاجاتك أو أسئلتك حول هذا الدرس، وستُحفظ في حسابك..."
                     value={notesText}
                     onChange={(e) => setNotesText(e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-[#800020] leading-relaxed"
+                    className="w-full bg-stone-50 dark:bg-[#1d1f29] border border-stone-200 dark:border-stone-700 rounded-xl p-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#800020] leading-relaxed"
                   />
                   <button
                     onClick={() => handleSaveProgress(currentProgressPct || 50, isCompleted)}
@@ -379,26 +379,26 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                 </div>
 
                 {/* Lesson Discussion & Comments with Letter Avatars */}
-                <div className="space-y-3 pt-3 border-t border-stone-100">
-                  <h4 className="text-xs font-extrabold text-slate-800 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-[#800020]" />
+                <div className="space-y-3 pt-3 border-t border-stone-100 dark:border-stone-800">
+                  <h4 className="text-xs font-extrabold text-slate-800 dark:text-stone-200 flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-[#800020] dark:text-rose-400" />
                     استفسارات الطلاب ومناقشة الدرس ({currentVideo.comments?.length || 0})
                   </h4>
 
                   <div className="max-h-36 overflow-y-auto space-y-2 text-xs">
                     {(!currentVideo.comments || currentVideo.comments.length === 0) ? (
-                      <p className="text-[11px] text-slate-400 py-1">لا توجد تعليقات بعد. اطرح سؤالك للمعلم!</p>
+                      <p className="text-[11px] text-slate-400 dark:text-stone-500 py-1">لا توجد تعليقات بعد. اطرح سؤالك للمعلم!</p>
                     ) : (
                       currentVideo.comments.map((c) => (
-                        <div key={c.id} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
+                        <div key={c.id} className="p-2.5 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 space-y-1">
                           <div className="flex items-center justify-between text-[11px]">
                             <div className="flex items-center gap-1.5">
                               <UserAvatar name={c.userName} size="xs" />
-                              <span className="font-bold text-slate-900">{c.userName}</span>
+                              <span className="font-bold text-slate-900 dark:text-white">{c.userName}</span>
                             </div>
-                            <span className="text-slate-400 text-[10px] font-mono">{c.date}</span>
+                            <span className="text-slate-400 dark:text-stone-500 text-[10px] font-mono">{c.date}</span>
                           </div>
-                          <p className="text-slate-600 leading-relaxed text-[11px] pr-6">{c.text}</p>
+                          <p className="text-slate-600 dark:text-stone-300 leading-relaxed text-[11px] pr-6">{c.text}</p>
                         </div>
                       ))
                     )}
@@ -411,7 +411,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                       placeholder="اطرح استفسارك حول هذا الدرس..."
                       value={commentInput}
                       onChange={(e) => setCommentInput(e.target.value)}
-                      className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#800020]"
+                      className="flex-1 bg-stone-50 dark:bg-[#1d1f29] border border-stone-200 dark:border-stone-700 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#800020]"
                     />
                     <button
                       type="submit"
@@ -433,7 +433,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
       {/* Playlist Grid */}
       {filteredVideos.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-base font-extrabold text-slate-900">
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
             الدروس المتاحة في {selectedSubject === 'all' ? 'جميع المواد' : `مادة ${selectedSubject}`}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -446,10 +446,10 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
                 <div
                   key={video.id}
                   onClick={() => handleSelectVideo(video)}
-                  className={`group cursor-pointer bg-white border rounded-2xl overflow-hidden transition-all flex flex-col justify-between ${
+                  className={`group cursor-pointer bg-white dark:bg-[#14151b] border rounded-2xl overflow-hidden transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-[#800020] ring-2 ring-[#800020]/20 shadow-md'
-                      : 'border-stone-200 hover:border-[#800020]/40 shadow-2xs'
+                      ? 'border-[#800020] dark:border-rose-500 ring-2 ring-[#800020]/20 shadow-md'
+                      : 'border-stone-200 dark:border-stone-800 hover:border-[#800020]/40 dark:hover:border-rose-500/40 shadow-2xs'
                   }`}
                 >
                   <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
@@ -472,25 +472,25 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({
 
                   <div className="p-4 space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#800020] font-bold bg-rose-50 border border-[#800020]/25 px-2 py-0.5 rounded">
+                      <span className="text-[#800020] dark:text-rose-400 font-bold bg-rose-50 dark:bg-[#20040c] border border-[#800020]/25 dark:border-rose-500/30 px-2 py-0.5 rounded">
                         {video.subject}
                       </span>
-                      <span className="text-slate-400 font-medium">{video.teacherName}</span>
+                      <span className="text-slate-400 dark:text-stone-500 font-medium">{video.teacherName}</span>
                     </div>
 
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#800020] transition-colors line-clamp-1">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#800020] dark:group-hover:text-rose-400 transition-colors line-clamp-1">
                       {video.title}
                     </h4>
 
                     {/* Progress Indicator */}
-                    <div className="space-y-1 pt-2 border-t border-stone-100">
-                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <div className="space-y-1 pt-2 border-t border-stone-100 dark:border-stone-800">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-stone-500">
                         <span>نسبة الإنجاز</span>
-                        <span className="font-bold text-slate-700">{pct}%</span>
+                        <span className="font-bold text-slate-700 dark:text-stone-300">{pct}%</span>
                       </div>
-                      <div className="w-full h-1 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-[#800020]'}`}
+                          className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-[#800020] dark:bg-rose-600'}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>

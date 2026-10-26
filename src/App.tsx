@@ -12,6 +12,7 @@ import { NewsSection } from './components/NewsSection';
 import { FriendsSection } from './components/FriendsSection';
 import { VideoLibrary } from './components/VideoLibrary';
 import { WalkthroughVideoModal } from './components/WalkthroughVideoModal';
+import { SplashScreen } from './components/SplashScreen';
 import { api } from './services/api';
 import { User, NewsItem, VideoLesson, StudentProgress, ChatMessage, StudentTask, SubjectCategory, UserRole } from './types';
 
@@ -21,6 +22,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'videos' | 'news' | 'friends'>('dashboard');
+  const [showSplash, setShowSplash] = useState(true);
   
   // Real data stores
   const [tasks, setTasks] = useState<StudentTask[]>([]);
@@ -340,28 +342,39 @@ export default function App() {
     }
   };
 
-  // If user is not logged in, render the Login Screen
+  // If user is not logged in, render the Login Screen with optional Splash overlay
   if (!currentUser) {
     return (
-      <LoginScreen
-        onLogin={handleLogin}
-        existingUsers={allUsers.map(u => ({
-          name: u.name,
-          role: u.role,
-          gender: u.gender,
-          avatar: u.avatar,
-          gradeOrSubject: u.gradeOrSubject,
-          schoolClass: u.schoolClass
-        }))}
-      />
+      <>
+        {showSplash && (
+          <SplashScreen onComplete={() => setShowSplash(false)} />
+        )}
+        <LoginScreen
+          onLogin={handleLogin}
+          onReplaySplash={() => setShowSplash(true)}
+          existingUsers={allUsers.map(u => ({
+            name: u.name,
+            role: u.role,
+            gender: u.gender,
+            avatar: u.avatar,
+            gradeOrSubject: u.gradeOrSubject,
+            schoolClass: u.schoolClass
+          }))}
+        />
+      </>
     );
   }
 
   const isTeacher = currentUser.role === 'teacher';
 
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-900 flex flex-col font-sans selection:bg-[#800020] selection:text-white" dir="rtl">
+    <div className="min-h-screen bg-stone-50 dark:bg-[#0c0d10] text-slate-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#800020] selection:text-white transition-colors duration-200" dir="rtl">
       
+      {/* 1.5s Splash Screen with split curtain animation */}
+      {showSplash && (
+        <SplashScreen onComplete={() => setShowSplash(false)} />
+      )}
+
       {/* 3-Zone Navigation Header */}
       <Navbar
         activeTab={activeTab}
@@ -370,6 +383,7 @@ export default function App() {
         onLogout={handleLogout}
         onOpenTutorial={() => setShowTutorialModal(true)}
         incomingRequestsCount={incomingRequests.length}
+        onReplaySplash={() => setShowSplash(true)}
       />
 
       {/* Main Container */}
@@ -441,21 +455,30 @@ export default function App() {
 
       </main>
 
-      {/* Footer in Burgundy & Black Theme */}
-      <footer className="border-t border-[#7d0d2b]/20 bg-white text-xs text-slate-500 py-6 mt-12">
+      {/* Footer in Burgundy & Black Theme with Administrator Badges & Credits */}
+      <footer className="border-t border-[#7d0d2b]/20 dark:border-rose-950/40 bg-white dark:bg-[#0c0d10] text-xs text-slate-500 dark:text-stone-400 py-6 mt-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-800">My School · المنصة المدرسية المتكاملة</span>
-            <span>·</span>
-            <span>بيئة تعليمية ذكية مخصصة للطلاب والمعلمين لمتابعة الدروس والتفاعل الصفي</span>
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-right">
+            <span className="font-extrabold text-slate-900 dark:text-white">My School · المنصة المدرسية المتكاملة</span>
+            <span className="hidden sm:inline">·</span>
+            <span>بإدارة وإشراف: <strong className="text-slate-800 dark:text-stone-200 font-bold">أيمن أحمد إبراهيم (Ayman Ahmed Ibrahim)</strong></span>
+            <span className="hidden sm:inline">·</span>
+            <span>جميع الحقوق محفوظة © 2026</span>
           </div>
 
           <div className="flex items-center gap-4 font-semibold">
             <button
               onClick={() => setShowTutorialModal(true)}
-              className="text-[#800020] hover:text-[#9e1336] transition-colors cursor-pointer"
+              className="text-[#800020] dark:text-rose-400 hover:text-[#9e1336] dark:hover:text-rose-300 transition-colors cursor-pointer"
             >
               دليل أهداف المنصة والشرح الصوتي (AI)
+            </button>
+            <button
+              onClick={() => setShowSplash(true)}
+              className="text-slate-500 dark:text-stone-400 hover:text-[#800020] dark:hover:text-rose-300 transition-colors cursor-pointer text-[11px]"
+              title="مشاهدة شاشة الترحيب وانقسام الصفحة"
+            >
+              شاشة الترحيب
             </button>
           </div>
         </div>

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     font-family: 'Alexandria', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -16,11 +18,23 @@
   background: #fcfbfb;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #0d0e12;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #d4d0d2;
   border-radius: 9999px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #373945;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #800020;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #a81c3b;
 }

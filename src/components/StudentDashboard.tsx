@@ -122,22 +122,22 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           />
 
           {/* Continue Watching Educational Lessons */}
-          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-xs space-y-4 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-extrabold text-slate-900">متابعة شروحات المناهج</h3>
-                <p className="text-xs text-slate-500">استكمل دروسك التعليمية واحفظ نقاط تقدمك تلقائياً</p>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">متابعة شروحات المناهج</h3>
+                <p className="text-xs text-slate-500 dark:text-stone-400">استكمل دروسك التعليمية واحفظ نقاط تقدمك تلقائياً</p>
               </div>
               <button
                 onClick={() => onNavigateTab('videos')}
-                className="text-xs text-[#800020] hover:text-[#9e1336] font-bold flex items-center gap-1 cursor-pointer"
+                className="text-xs text-[#800020] dark:text-rose-400 hover:text-[#9e1336] dark:hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer"
               >
                 تصفح مكتبة الدروس
               </button>
             </div>
 
             {lessons.length === 0 ? (
-              <div className="p-6 rounded-xl bg-stone-50 border border-stone-200 text-center text-slate-500 text-xs">
+              <div className="p-6 rounded-xl bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 text-center text-slate-500 dark:text-stone-400 text-xs">
                 لم يتم إضافة شروحات بعد من قبل المعلمين. فور إضافة المعلم لدرس أو صورة توضيحية ستظهر هنا لمتابعتها.
               </div>
             ) : (
@@ -149,9 +149,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                   return (
                     <div
                       key={lesson.id}
-                      className="group bg-stone-50 border border-stone-200 hover:border-[#800020]/40 rounded-xl overflow-hidden transition-all flex flex-col justify-between"
+                      className="group bg-stone-50 dark:bg-[#1a1b24] border border-stone-200 dark:border-stone-800 hover:border-[#800020]/40 dark:hover:border-rose-600/40 rounded-xl overflow-hidden transition-all flex flex-col justify-between"
                     >
-                      <div className="relative aspect-video w-full overflow-hidden bg-stone-200">
+                      <div className="relative aspect-video w-full overflow-hidden bg-stone-200 dark:bg-stone-900">
                         {lesson.mediaType === 'image' ? (
                           <img
                             src={lesson.mediaData || lesson.thumbnail}
@@ -178,21 +178,21 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       </div>
 
                       <div className="p-3.5 space-y-2">
-                        <div className="text-[11px] text-[#800020] font-bold">
+                        <div className="text-[11px] text-[#800020] dark:text-rose-400 font-bold">
                           {lesson.subject}
                         </div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-[#800020] transition-colors">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-[#800020] dark:group-hover:text-rose-400 transition-colors">
                           {lesson.title}
                         </h4>
 
                         <div className="space-y-1 pt-1">
-                          <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-stone-400 font-medium">
                             <span>نسبة الإتمام</span>
-                            <span className="font-bold text-slate-800">{pct}%</span>
+                            <span className="font-bold text-slate-800 dark:text-stone-200">{pct}%</span>
                           </div>
-                          <div className="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                          <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-[#800020]'}`}
+                              className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-[#800020] dark:bg-rose-600'}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -211,24 +211,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <div className="lg:col-span-4 space-y-6">
           
           {/* Subject Performance Breakdown */}
-          <div className="bg-white border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#14151b] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-xs space-y-4 transition-colors">
             <div>
-              <h3 className="text-base font-extrabold text-slate-900">أداء المواد الدراسية</h3>
-              <p className="text-xs text-slate-500">معدل الإتقان والدرجات لكل مادة في My School</p>
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">أداء المواد الدراسية</h3>
+              <p className="text-xs text-slate-500 dark:text-stone-400">معدل الإتقان والدرجات لكل مادة في My School</p>
             </div>
 
             <div className="space-y-3 pt-1">
               {subjectPerformance.map((subj) => (
                 <div key={subj.name} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-800">{subj.name}</span>
-                    <div className="flex items-center gap-2 text-slate-500 font-medium text-[11px]">
+                    <span className="font-bold text-slate-800 dark:text-stone-200">{subj.name}</span>
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-stone-400 font-medium text-[11px]">
                       <span>{subj.hours}</span>
-                      <span className="text-emerald-600 font-bold">{subj.trend}</span>
-                      <span className="font-extrabold text-slate-900 tabular-nums">{subj.score}%</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{subj.trend}</span>
+                      <span className="font-extrabold text-slate-900 dark:text-white tabular-nums">{subj.score}%</span>
                     </div>
                   </div>
-                  <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${subj.score}%`, backgroundColor: subj.color }}
@@ -239,10 +239,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             </div>
 
             {/* Performance Curve SVG in Burgundy */}
-            <div className="pt-4 border-t border-[#7d0d2b]/15">
+            <div className="pt-4 border-t border-[#7d0d2b]/15 dark:border-rose-900/30">
               <div className="flex items-center justify-between mb-2 text-xs">
-                <span className="text-slate-500 font-medium">منحنى التطور الأسبوعي</span>
-                <span className="text-emerald-600 font-bold flex items-center gap-1">
+                <span className="text-slate-500 dark:text-stone-400 font-medium">منحنى التطور الأسبوعي</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" />
                   أعلى من المعدل بـ 12%
                 </span>
@@ -266,20 +266,20 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           </div>
 
           {/* Social Peers Teaser */}
-          <div className="bg-gradient-to-br from-rose-50/50 via-white to-rose-50/20 border border-[#7d0d2b]/20 rounded-2xl p-6 shadow-xs space-y-3">
+          <div className="bg-gradient-to-br from-rose-50/50 via-white to-rose-50/20 dark:from-[#1b1c26] dark:via-[#14151b] dark:to-[#1a050e] border border-[#7d0d2b]/20 dark:border-rose-900/30 rounded-2xl p-6 shadow-xs space-y-3 transition-colors">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#800020]" />
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-4 h-4 text-[#800020] dark:text-rose-400" />
                 شبكة زملاء الصف
               </h3>
               <button
                 onClick={() => onNavigateTab('friends')}
-                className="text-xs text-[#800020] hover:text-[#9e1336] font-bold cursor-pointer"
+                className="text-xs text-[#800020] dark:text-rose-400 hover:text-[#9e1336] dark:hover:text-rose-300 font-bold cursor-pointer"
               >
                 تصفح الزملاء
               </button>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-stone-300 leading-relaxed">
               تواصل مع زملائك، أرسل طلبات صداقة، وتدربوا سوياً على أسئلة اختبارات المواد في My School.
             </p>
             <button
